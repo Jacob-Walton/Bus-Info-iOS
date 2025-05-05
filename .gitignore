@@ -1,0 +1,78 @@
+# Xcode
+build/
+DerivedData/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+*.xcscmblueprint
+
+# Xcode automatic backup files
+*.xcuserstate
+
+# SwiftPM
+.build/
+Package.resolved
+
+# CocoaPods
+Pods/
+
+# Carthage
+Carthage/
+Carthage/Build/
+
+# fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+
+# Archives
+*.xcarchive
+
+# iOS device logs
+*.mobileprovision
+*.ipa
+
+# Playgrounds
+timeline.xctimeline
+playground.xcworkspace
+
+# App thinning
+*.app-thinning.plist
+
+# Swift Package Index
+.swiftpm/
+
+# Editor settings
+*.swp
+*.swo
+*.kate-swp
+*.orig
+
+# macOS files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Thumbnails
+._*
+
+# Spotlight
+*.Spotlight-V100
+
+# Trash
+.Trashes
+
+# Tags
+tags
+
+# Other editors
+.idea/
+*.iml
+.vscode/

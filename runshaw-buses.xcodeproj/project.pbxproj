@@ -6,6 +6,12 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		3B1BBB45759B6A87090DCFCC /* Pods_runshaw_buses.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E52FDCF1DE958615159BBB7 /* Pods_runshaw_buses.framework */; };
+		5342EBEDF788AA61BADDC973 /* Pods_runshaw_buses_runshaw_busesUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D465512D6EBBC5EFB2B3FD47 /* Pods_runshaw_buses_runshaw_busesUITests.framework */; };
+		AD169D06F2D499669AB030CF /* Pods_runshaw_busesTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 762D82EB056DBBD1C3ADAB58 /* Pods_runshaw_busesTests.framework */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		16C4D5212DC6203A00BCF33F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -24,24 +30,50 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		06AEA13A8496187E07AACCAA /* Pods-runshaw-busesTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-runshaw-busesTests.release.xcconfig"; path = "Target Support Files/Pods-runshaw-busesTests/Pods-runshaw-busesTests.release.xcconfig"; sourceTree = "<group>"; };
 		16C4D5132DC6203900BCF33F /* runshaw-buses.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "runshaw-buses.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		16C4D5202DC6203A00BCF33F /* runshaw-busesTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "runshaw-busesTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		16C4D52A2DC6203A00BCF33F /* runshaw-busesUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "runshaw-busesUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2E52FDCF1DE958615159BBB7 /* Pods_runshaw_buses.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_runshaw_buses.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		762D82EB056DBBD1C3ADAB58 /* Pods_runshaw_busesTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_runshaw_busesTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B7A9E8EC18CB6B22F736344E /* Pods-runshaw-buses.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-runshaw-buses.release.xcconfig"; path = "Target Support Files/Pods-runshaw-buses/Pods-runshaw-buses.release.xcconfig"; sourceTree = "<group>"; };
+		C116653E6EF1069CA72CBC6C /* Pods-runshaw-buses-runshaw-busesUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-runshaw-buses-runshaw-busesUITests.release.xcconfig"; path = "Target Support Files/Pods-runshaw-buses-runshaw-busesUITests/Pods-runshaw-buses-runshaw-busesUITests.release.xcconfig"; sourceTree = "<group>"; };
+		D465512D6EBBC5EFB2B3FD47 /* Pods_runshaw_buses_runshaw_busesUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_runshaw_buses_runshaw_busesUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		EF50632314465F87343CF6F3 /* Pods-runshaw-buses.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-runshaw-buses.debug.xcconfig"; path = "Target Support Files/Pods-runshaw-buses/Pods-runshaw-buses.debug.xcconfig"; sourceTree = "<group>"; };
+		FB7B8EDBAB1A3C4E7ECA7EEE /* Pods-runshaw-buses-runshaw-busesUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-runshaw-buses-runshaw-busesUITests.debug.xcconfig"; path = "Target Support Files/Pods-runshaw-buses-runshaw-busesUITests/Pods-runshaw-buses-runshaw-busesUITests.debug.xcconfig"; sourceTree = "<group>"; };
+		FED5A70DA2AECB7CE503BDEE /* Pods-runshaw-busesTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-runshaw-busesTests.debug.xcconfig"; path = "Target Support Files/Pods-runshaw-busesTests/Pods-runshaw-busesTests.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		161932742DC6BAC900ACE5EE /* Exceptions for "runshaw-buses" folder in "runshaw-buses" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 16C4D5122DC6203900BCF33F /* runshaw-buses */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		16C4D5152DC6203900BCF33F /* runshaw-buses */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				161932742DC6BAC900ACE5EE /* Exceptions for "runshaw-buses" folder in "runshaw-buses" target */,
+			);
 			path = "runshaw-buses";
 			sourceTree = "<group>";
 		};
 		16C4D5232DC6203A00BCF33F /* runshaw-busesTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
 			path = "runshaw-busesTests";
 			sourceTree = "<group>";
 		};
 		16C4D52D2DC6203A00BCF33F /* runshaw-busesUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
 			path = "runshaw-busesUITests";
 			sourceTree = "<group>";
 		};
@@ -52,6 +84,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3B1BBB45759B6A87090DCFCC /* Pods_runshaw_buses.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -59,6 +92,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AD169D06F2D499669AB030CF /* Pods_runshaw_busesTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -66,6 +100,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5342EBEDF788AA61BADDC973 /* Pods_runshaw_buses_runshaw_busesUITests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -79,6 +114,8 @@
 				16C4D5232DC6203A00BCF33F /* runshaw-busesTests */,
 				16C4D52D2DC6203A00BCF33F /* runshaw-busesUITests */,
 				16C4D5142DC6203900BCF33F /* Products */,
+				969EF2FAABCBEE6BB6948BB8 /* Pods */,
+				BC2764F55B35767072311231 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -92,6 +129,29 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		969EF2FAABCBEE6BB6948BB8 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				EF50632314465F87343CF6F3 /* Pods-runshaw-buses.debug.xcconfig */,
+				B7A9E8EC18CB6B22F736344E /* Pods-runshaw-buses.release.xcconfig */,
+				FB7B8EDBAB1A3C4E7ECA7EEE /* Pods-runshaw-buses-runshaw-busesUITests.debug.xcconfig */,
+				C116653E6EF1069CA72CBC6C /* Pods-runshaw-buses-runshaw-busesUITests.release.xcconfig */,
+				FED5A70DA2AECB7CE503BDEE /* Pods-runshaw-busesTests.debug.xcconfig */,
+				06AEA13A8496187E07AACCAA /* Pods-runshaw-busesTests.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		BC2764F55B35767072311231 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				2E52FDCF1DE958615159BBB7 /* Pods_runshaw_buses.framework */,
+				D465512D6EBBC5EFB2B3FD47 /* Pods_runshaw_buses_runshaw_busesUITests.framework */,
+				762D82EB056DBBD1C3ADAB58 /* Pods_runshaw_busesTests.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -99,9 +159,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 16C4D5342DC6203A00BCF33F /* Build configuration list for PBXNativeTarget "runshaw-buses" */;
 			buildPhases = (
+				34E934E5680C4F77F9ED27C8 /* [CP] Check Pods Manifest.lock */,
 				16C4D50F2DC6203900BCF33F /* Sources */,
 				16C4D5102DC6203900BCF33F /* Frameworks */,
 				16C4D5112DC6203900BCF33F /* Resources */,
+				2536743F3D76FE752C86D0FB /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -111,8 +173,6 @@
 				16C4D5152DC6203900BCF33F /* runshaw-buses */,
 			);
 			name = "runshaw-buses";
-			packageProductDependencies = (
-			);
 			productName = "runshaw-buses";
 			productReference = 16C4D5132DC6203900BCF33F /* runshaw-buses.app */;
 			productType = "com.apple.product-type.application";
@@ -121,6 +181,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 16C4D5372DC6203A00BCF33F /* Build configuration list for PBXNativeTarget "runshaw-busesTests" */;
 			buildPhases = (
+				3CA9903DAF379FC5957EF1DC /* [CP] Check Pods Manifest.lock */,
 				16C4D51C2DC6203A00BCF33F /* Sources */,
 				16C4D51D2DC6203A00BCF33F /* Frameworks */,
 				16C4D51E2DC6203A00BCF33F /* Resources */,
@@ -134,8 +195,6 @@
 				16C4D5232DC6203A00BCF33F /* runshaw-busesTests */,
 			);
 			name = "runshaw-busesTests";
-			packageProductDependencies = (
-			);
 			productName = "runshaw-busesTests";
 			productReference = 16C4D5202DC6203A00BCF33F /* runshaw-busesTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -144,9 +203,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 16C4D53A2DC6203A00BCF33F /* Build configuration list for PBXNativeTarget "runshaw-busesUITests" */;
 			buildPhases = (
+				3AEF85FAF778F64EA337A623 /* [CP] Check Pods Manifest.lock */,
 				16C4D5262DC6203A00BCF33F /* Sources */,
 				16C4D5272DC6203A00BCF33F /* Frameworks */,
 				16C4D5282DC6203A00BCF33F /* Resources */,
+				7BE9C2CAA1B7E973C27FAF21 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -157,8 +218,6 @@
 				16C4D52D2DC6203A00BCF33F /* runshaw-busesUITests */,
 			);
 			name = "runshaw-busesUITests";
-			packageProductDependencies = (
-			);
 			productName = "runshaw-busesUITests";
 			productReference = 16C4D52A2DC6203A00BCF33F /* runshaw-busesUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
@@ -230,6 +289,109 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		2536743F3D76FE752C86D0FB /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-runshaw-buses/Pods-runshaw-buses-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-runshaw-buses/Pods-runshaw-buses-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-runshaw-buses/Pods-runshaw-buses-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		34E934E5680C4F77F9ED27C8 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-runshaw-buses-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		3AEF85FAF778F64EA337A623 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-runshaw-buses-runshaw-busesUITests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		3CA9903DAF379FC5957EF1DC /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-runshaw-busesTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		7BE9C2CAA1B7E973C27FAF21 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-runshaw-buses-runshaw-busesUITests/Pods-runshaw-buses-runshaw-busesUITests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-runshaw-buses-runshaw-busesUITests/Pods-runshaw-buses-runshaw-busesUITests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-runshaw-buses-runshaw-busesUITests/Pods-runshaw-buses-runshaw-busesUITests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		16C4D50F2DC6203900BCF33F /* Sources */ = {
@@ -307,7 +469,7 @@
 				DEVELOPMENT_TEAM = L4D3B7X92S;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -371,7 +533,7 @@
 				DEVELOPMENT_TEAM = L4D3B7X92S;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -392,19 +554,26 @@
 		};
 		16C4D5352DC6203A00BCF33F /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = EF50632314465F87343CF6F3 /* Pods-runshaw-buses.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "runshaw-buses/runshaw-buses.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = L4D3B7X92S;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "runshaw-buses/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Runshaw Buses";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleLightContent;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -412,27 +581,38 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.konpeki.runshaw-buses";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
 		16C4D5362DC6203A00BCF33F /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = B7A9E8EC18CB6B22F736344E /* Pods-runshaw-buses.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "runshaw-buses/runshaw-buses.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = L4D3B7X92S;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "runshaw-buses/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Runshaw Buses";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleLightContent;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -440,14 +620,19 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.konpeki.runshaw-buses";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
 		16C4D5382DC6203A00BCF33F /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = FED5A70DA2AECB7CE503BDEE /* Pods-runshaw-busesTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
@@ -467,6 +652,7 @@
 		};
 		16C4D5392DC6203A00BCF33F /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 06AEA13A8496187E07AACCAA /* Pods-runshaw-busesTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
@@ -486,6 +672,7 @@
 		};
 		16C4D53B2DC6203A00BCF33F /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = FB7B8EDBAB1A3C4E7ECA7EEE /* Pods-runshaw-buses-runshaw-busesUITests.debug.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -503,6 +690,7 @@
 		};
 		16C4D53C2DC6203A00BCF33F /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = C116653E6EF1069CA72CBC6C /* Pods-runshaw-buses-runshaw-busesUITests.release.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
