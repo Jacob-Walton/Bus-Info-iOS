@@ -300,7 +300,7 @@ struct BusListView: View {
 
 /// Information section showing last update time
 struct InfoSection: View {
-    /// Raw last updated timestamp from API
+    /// Formatted last updated timestamp - already processed by BusInfoViewModel
     let lastUpdated: String
     
     var body: some View {
@@ -510,7 +510,7 @@ struct HomeView_Previews: PreviewProvider {
             "123": BusData(status: "Arrived", bay: "B3", id: 2),
             "137": BusData(status: "Arrived", bay: "C5", id: 3),
             "142": BusData(status: "Arrived", bay: "A1", id: 4),
-            "160": BusData(status: "Not Arrived", bay: nil, id: 5)
+            "160": BusData(status: "Not arrived", bay: nil, id: 5)
         ]
         
         mockBusInfoService.setMockBusInfo(busData: sampleBusData)

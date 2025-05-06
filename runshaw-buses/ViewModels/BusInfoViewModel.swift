@@ -100,30 +100,66 @@ class BusInfoViewModel: ObservableObject {
             return "Unknown"
         }
         
-        // Print the raw date string for debugging
-        print("Attempting to parse date: \(lastUpdated)")
+        // First try with ISO8601DateFormatter which handles timezone properly
+        let isoFormatter = ISO8601DateFormatter()
+        var date: Date?
         
-        // Try to parse the timestamp from the API format
-        let dateFormatter = DateFormatter()
-        // Use POSIX locale to ensure consistent parsing regardless of user's region settings
-        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
-        // Set the correct format (ISO 8601)
-        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ" 
+        // Try to parse the date with ISO formatter (preserves timezone info)
+        date = isoFormatter.date(from: lastUpdated)
         
-        if let date = dateFormatter.date(from: lastUpdated) {
-            // Format for display
-            let displayFormatter = DateFormatter()
-            displayFormatter.dateStyle = .medium
-            displayFormatter.timeStyle = .short
-            // Use current locale for display formatting
-            displayFormatter.locale = Locale.current 
-            return displayFormatter.string(from: date)
-        } else {
-            // Log failure if parsing fails
-            print("Failed to parse date string: \(lastUpdated) with format \(dateFormatter.dateFormat ?? "nil")")
+        // If that fails, try custom formatters as fallback
+        if date == nil {
+            let customFormatters = [
+                "yyyy-MM-dd'T'HH:mm:ss'Z'",
+                "yyyy-MM-dd'T'HH:mm:ssZ",
+                "yyyy-MM-dd'T'HH:mm:ss"
+            ]
+            
+            let dateFormatter = DateFormatter()
+            dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+            dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
+            
+            for format in customFormatters {
+                dateFormatter.dateFormat = format
+                if let parsedDate = dateFormatter.date(from: lastUpdated) {
+                    date = parsedDate
+                    break
+                }
+            }
         }
         
-        // Return the raw string if parsing fails
+        // If we have a valid date, format it for display in user's timezone
+        if let date = date {
+            let calendar = Calendar.current
+            
+            // Create time formatter using user's timezone
+            let timeFormatter = DateFormatter()
+            timeFormatter.dateFormat = "HH:mm:ss"
+            timeFormatter.timeZone = TimeZone.current  // User's local timezone
+            let timeString = timeFormatter.string(from: date)
+            
+            // Use calendar with user's timezone for proper "today"/"yesterday" calculations
+            var userCalendar = Calendar.current
+            userCalendar.timeZone = TimeZone.current
+            
+            if userCalendar.isDateInToday(date) {
+                return "Today at \(timeString)"
+            } else if userCalendar.isDateInYesterday(date) {
+                return "Yesterday at \(timeString)"
+            } else {
+                let fullFormatter = DateFormatter()
+                fullFormatter.dateStyle = .medium
+                fullFormatter.timeStyle = .none
+                fullFormatter.timeZone = TimeZone.current  // User's local timezone
+                return "\(fullFormatter.string(from: date)) at \(timeString)"
+            }
+        }
+        
+        #if DEBUG
+        print("Failed to parse date string: \(lastUpdated)")
+        #endif
+        
+        // Return the raw string if all parsing attempts fail
         return lastUpdated
     }
     
@@ -134,7 +170,7 @@ class BusInfoViewModel: ObservableObject {
             return false
         }
 
-        if status.contains("Not Arrived") {
+        if status.contains("Not arrived") {
             return false
         }
         
