@@ -12,7 +12,7 @@ class BusInfoService: BusInfoServiceProtocol {
     
     func getBusInfo() -> AnyPublisher<BusInfoResponse, NetworkError> {
         // Get the auth token from keychain
-        guard let token = keychainService.getAuthToken() else {
+        guard (keychainService.getAuthToken()) != nil else {
             return Fail(error: NetworkError.unauthorized).eraseToAnyPublisher()
         }
 

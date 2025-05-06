@@ -203,10 +203,10 @@ class MockKeychainService: KeychainServiceProtocol {
     
     // Helper method to set up test state
     func setupTestUser(withToken token: String = "test-token") {
-        saveAuthToken(token)
-        saveRefreshToken("test-refresh-token")
-        saveTokenExpiration(Date().addingTimeInterval(3600)) // 1 hour from now
-        saveCurrentUser(User(id: "test-id", email: "test@example.com", name: "Test User", role: .student))
+        _ = saveAuthToken(token)
+        _ = saveRefreshToken("test-refresh-token")
+        _ = saveTokenExpiration(Date().addingTimeInterval(3600)) // 1 hour from now
+        _ = saveCurrentUser(User(id: "test-id", email: "test@example.com", name: "Test User", role: .student))
     }
 }
 #endif

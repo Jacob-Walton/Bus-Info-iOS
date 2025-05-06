@@ -2,8 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>GIDClientID</key>
-	<string>219233013774-uenqrkjnrdkci1v8bfrha1e0tip87nbt.apps.googleusercontent.com</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -15,5 +13,16 @@
 			</array>
 		</dict>
 	</array>
+	<key>GIDClientID</key>
+	<string>219233013774-uenqrkjnrdkci1v8bfrha1e0tip87nbt.apps.googleusercontent.com</string>
+	<key>UILaunchScreen</key>
+	<dict>
+		<key>UIColorName</key>
+		<string>runshaw</string>
+		<key>UIImageName</key>
+		<string>AppIcon</string>
+		<key>UILaunchScreen</key>
+		<dict/>
+	</dict>
 </dict>
 </plist>

@@ -9,7 +9,7 @@ class BusInfoViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var error: String?
     @Published var sortedBusKeys: [String] = []
-    @Published var mapUrl: URL?
+    @Published var mapUrl: URL? = URL(string: ConfigurationManager.shared.currentConfig.baseURL.absoluteString + "/api/v2/businfo/map")
     
     private var busInfoService: BusInfoServiceProtocol
     private var cancellables = Set<AnyCancellable>()
@@ -24,6 +24,9 @@ class BusInfoViewModel: ObservableObject {
         
         // Set up auto-refresh
         setupRefreshTimer()
+        
+        // Log the map URL being used
+        print("Current map URL: \(mapUrl?.absoluteString ?? "Unknown")")
     }
     
     deinit {
@@ -130,8 +133,6 @@ class BusInfoViewModel: ObservableObject {
         
         // If we have a valid date, format it for display in user's timezone
         if let date = date {
-            let calendar = Calendar.current
-            
             // Create time formatter using user's timezone
             let timeFormatter = DateFormatter()
             timeFormatter.dateFormat = "HH:mm:ss"

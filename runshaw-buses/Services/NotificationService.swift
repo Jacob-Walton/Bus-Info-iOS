@@ -146,47 +146,42 @@ class NotificationService: NSObject, NotificationServiceProtocol, ObservableObje
     private func handleNotification(userInfo: [AnyHashable: Any], wasOpened: Bool = false) {
         // Print the raw payload for debugging
         print("Received userInfo: \(userInfo)")
-
-        do {
-            // Extract standard APS data
-            guard let aps = userInfo["aps"] as? [String: Any],
-                  let alert = aps["alert"] as? [String: Any],
-                  let title = alert["title"] as? String,
-                  let body = alert["body"] as? String else {
-                print("Invalid APS notification format")
-                return
-            }
-
-            // Extract custom data from root level
-            let id = userInfo["id"] as? String ?? UUID().uuidString // Use "id" from root
-            let typeString = userInfo["notificationType"] as? String ?? PushNotification.NotificationType.general.rawValue // Use "notificationType" from root
-            let type = PushNotification.NotificationType(rawValue: typeString) ?? .general
-            
-            var data: [String: String]? = nil
-            if let customData = userInfo["data"] as? [String: String] { // Use "data" from root
-                data = customData
-            }
-            
-            // Create notification object
-            let notification = PushNotification(
-                id: id,
-                title: title, // From aps.alert
-                body: body,   // From aps.alert
-                date: Date(),
-                type: type,   // From root
-                data: data,   // From root
-                isRead: false
-            )
-            
-            // Add to list and update counter
-            addNotification(notification)
-            
-            // Update badge count
-            updateBadgeCount()
-        } catch {
-            // This catch block might not be necessary if using guard/let safely
-            print("Error processing notification: \(error)")
+        
+        // Extract standard APS data
+        guard let aps = userInfo["aps"] as? [String: Any],
+              let alert = aps["alert"] as? [String: Any],
+              let title = alert["title"] as? String,
+              let body = alert["body"] as? String else {
+            print("Invalid APS notification format")
+            return
         }
+        
+        // Extract custom data from root level
+        let id = userInfo["id"] as? String ?? UUID().uuidString // Use "id" from root
+        let typeString = userInfo["notificationType"] as? String ?? PushNotification.NotificationType.general.rawValue // Use "notificationType" from root
+        let type = PushNotification.NotificationType(rawValue: typeString) ?? .general
+        
+        var data: [String: String]? = nil
+        if let customData = userInfo["data"] as? [String: String] { // Use "data" from root
+            data = customData
+        }
+        
+        // Create notification object
+        let notification = PushNotification(
+            id: id,
+            title: title, // From aps.alert
+            body: body,   // From aps.alert
+            date: Date(),
+            type: type,   // From root
+            data: data,   // From root
+            isRead: false
+        )
+        
+        // Add to list and update counter
+        addNotification(notification)
+        
+        // Update badge count
+        updateBadgeCount()
     }
     
     /// Add notification to the list
@@ -238,8 +233,10 @@ class NotificationService: NSObject, NotificationServiceProtocol, ObservableObje
     
     /// Update the app badge count
     private func updateBadgeCount() {
-        DispatchQueue.main.async {
-            UIApplication.shared.applicationIconBadgeNumber = self.unreadCount
+        UNUserNotificationCenter.current().setBadgeCount(unreadCount) { error in
+            if let error = error {
+                print("Failed to set badge count: \(error)")
+            }
         }
     }
     
@@ -299,7 +296,7 @@ class NotificationService: NSObject, NotificationServiceProtocol, ObservableObje
 
 extension NotificationService {
     /// Create a notification service with configuration from the environment
-    static func create() -> NotificationServiceProtocol & ObservableObject {
+    static func create() -> any NotificationServiceProtocol & ObservableObject {
         return NotificationService.shared
     }
 }
@@ -381,7 +378,6 @@ class MockNotificationService: NSObject, NotificationServiceProtocol, Observable
     func addNotification(_ notification: PushNotification) {
         DispatchQueue.main.async {
             var mutableNotification = notification
-            // If the notification is not already read, increment unread count
             if !mutableNotification.isRead {
                 self.unreadCount += 1
             }

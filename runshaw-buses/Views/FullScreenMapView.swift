@@ -79,9 +79,6 @@ struct FullScreenMapView: View {
                                         height: lastOffset.height + value.translation.height
                                     )
                                     
-                                    // Limit panning based on scale
-                                    let maxOffset = (scale - 1) * 1000 // Large value to allow full panning
-                                    
                                     // Only allow panning when zoomed in
                                     if scale > 1.0 {
                                         offset = newOffset

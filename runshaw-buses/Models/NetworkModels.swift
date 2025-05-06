@@ -17,7 +17,7 @@ enum AuthType {
 
 // MARK: - Network Error Handling
 
-enum NetworkError: Error, LocalizedError {
+enum NetworkError: Error, LocalizedError, Equatable {
     case invalidURL
     case invalidResponse
     case httpStatusCode(Int)
@@ -42,6 +42,25 @@ enum NetworkError: Error, LocalizedError {
             return "Unauthorized access"
         case .unexpectedError(let error):
             return "Unexpected error: \(error.localizedDescription)"
+        }
+    }
+    
+    static func == (lhs: NetworkError, rhs: NetworkError) -> Bool {
+        switch (lhs, rhs) {
+        case (.invalidURL, .invalidURL),
+             (.invalidResponse, .invalidResponse),
+             (.unauthorized, .unauthorized):
+            return true
+        case (.httpStatusCode(let lhsCode), .httpStatusCode(let rhsCode)):
+            return lhsCode == rhsCode
+        case (.serverError(let lhsMessage), .serverError(let rhsMessage)):
+            return lhsMessage == rhsMessage
+        case (.decodingError(let lhsError), .decodingError(let rhsError)):
+            return lhsError.localizedDescription == rhsError.localizedDescription
+        case (.unexpectedError(let lhsError), .unexpectedError(let rhsError)):
+            return lhsError.localizedDescription == rhsError.localizedDescription
+        default:
+            return false
         }
     }
 }

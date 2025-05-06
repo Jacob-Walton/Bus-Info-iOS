@@ -1,11 +1,3 @@
-//
-//  PushNotification.swift
-//  runshaw-buses
-//
-//  Created by Jacob on 03/05/2025.
-//  Copyright © 2025 Konpeki. All rights reserved.
-//
-
 import Foundation
 
 /// Model for registering a device with the backend notification service
@@ -17,7 +9,7 @@ struct DeviceRegistration: Codable {
     let deviceToken: String
     
     /// Device platform identifier - always "ios" for this app
-    let deviceType: String = "ios"
+    var deviceType: String = "ios"
     
     /// Current app version for compatibility tracking
     let appVersion: String
