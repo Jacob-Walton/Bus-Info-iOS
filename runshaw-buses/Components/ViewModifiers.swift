@@ -10,6 +10,7 @@ struct PrimaryButtonStyle: ViewModifier {
             .background(Design.Colors.primary)
             .foregroundStyle(.white)
             .clipShape(UnevenRoundedRectangle.appStyle(radius: Design.Layout.buttonRadius))
+            .shadow(color: Design.Colors.primary.opacity(0.3), radius: 5, x: 0, y: 2)
     }
 }
 
@@ -21,6 +22,7 @@ struct SecondaryButtonStyle: ViewModifier {
             .background(Design.Colors.secondary)
             .foregroundStyle(.white)
             .clipShape(UnevenRoundedRectangle.appStyle(radius: Design.Layout.buttonRadius))
+            .shadow(color: Design.Colors.secondary.opacity(0.3), radius: 5, x: 0, y: 2)
     }
 }
 
@@ -47,12 +49,13 @@ struct CardStyle: ViewModifier {
             .clipShape(UnevenRoundedRectangle.appStyle(radius: Design.Layout.regularRadius))
             .overlay(
                 UnevenRoundedRectangle.appStyle(radius: Design.Layout.regularRadius)
-                    .shadow(
-                        color: Design.Colors.shadowColor,
-                        radius: 8,
-                        x: 0,
-                        y: 4
-                    )
+                    .stroke(Design.Colors.border, lineWidth: 1)
+            )
+            .shadow(
+                color: Design.Colors.shadowColor,
+                radius: 8,
+                x: 0,
+                y: 4
             )
     }
 }
@@ -62,6 +65,7 @@ struct TextFieldBorderStyle: ViewModifier {
         content
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
+            .background(Design.Colors.background)
             .clipShape(UnevenRoundedRectangle.appStyle(radius: Design.Layout.buttonRadius))
             .overlay(
                 UnevenRoundedRectangle.appStyle(radius: Design.Layout.buttonRadius)
@@ -91,6 +95,12 @@ extension View {
     
     func textFieldBorderStyle() -> some View {
         self.modifier(TextFieldBorderStyle())
+    }
+    
+    /// Standard section title styling
+    func sectionTitleStyle() -> some View {
+        self.font(.system(size: Design.Typography.heading5Size, weight: .semibold))
+            .foregroundStyle(Design.Colors.secondary)
     }
 }
 

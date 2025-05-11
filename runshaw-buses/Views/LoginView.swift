@@ -39,16 +39,26 @@ struct LoginView: View {
     
     var body: some View {
         GeometryReader { geometry in
-            HStack(spacing: 0) {
-                ScrollView {
+            ScrollView {
+                VStack(spacing: 0) {
+                    // Updated hero with SharedHeroView
+                    SharedHeroView(
+                        title: "Welcome Back",
+                        subtitle: "Sign in to check bus status",
+                        height: 180,
+                        contentBottomPadding: 24
+                    )
+                    .padding(.bottom, Design.Spacing.medium)
+                    
                     VStack(alignment: .center) {
+                        // App logo
                         AppLogo()
-                        
-                        WelcomeHeader()
-                        
+                            .padding(.bottom, Design.Spacing.small)
+                            
                         // Error message display
                         if authViewModel.showError, let errorMessage = authViewModel.errorMessage {
                             ErrorBanner(message: errorMessage)
+                                .padding(.horizontal, Design.Spacing.medium)
                         }
                         
                         // Login form
@@ -76,6 +86,7 @@ struct LoginView: View {
                             }
                             .padding(.top, Design.Spacing.small)
                         }
+                        .padding(.horizontal, Design.Spacing.medium * 1.5)
                         
                         DividerWithText(text: "or continue with")
                         
@@ -95,17 +106,19 @@ struct LoginView: View {
                                 handleAppleSignIn()
                             }
                         }
+                        .padding(.horizontal, Design.Spacing.medium * 1.5)
                         
                         CreateAccountButton()
+                            .padding(.top, Design.Spacing.medium)
                     }
-                    .padding(.horizontal, Design.Spacing.medium * 1.5)
                     .padding(.vertical, Design.Spacing.large)
-                    .frame(minHeight: geometry.size.height)
+                    .frame(minHeight: geometry.size.height - 180)  // Adjust for hero height
                     .frame(maxWidth: 400)
                     .frame(maxWidth: .infinity)
+                    .background(Design.Colors.background)
                 }
-                .background(Design.Colors.background)
             }
+            .background(Design.Colors.background)
         }
         .sheet(isPresented: $showReactivationModal) {
             ReactivationModalView(

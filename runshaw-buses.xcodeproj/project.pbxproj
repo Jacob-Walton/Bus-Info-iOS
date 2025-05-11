@@ -65,15 +65,11 @@
 		};
 		16C4D5232DC6203A00BCF33F /* runshaw-busesTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = "runshaw-busesTests";
 			sourceTree = "<group>";
 		};
 		16C4D52D2DC6203A00BCF33F /* runshaw-busesUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = "runshaw-busesUITests";
 			sourceTree = "<group>";
 		};
@@ -299,9 +295,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-runshaw-buses/Pods-runshaw-buses-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-runshaw-buses/Pods-runshaw-buses-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -382,9 +382,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-runshaw-buses-runshaw-busesUITests/Pods-runshaw-buses-runshaw-busesUITests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-runshaw-buses-runshaw-busesUITests/Pods-runshaw-buses-runshaw-busesUITests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;

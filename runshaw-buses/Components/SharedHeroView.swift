@@ -1,0 +1,191 @@
+import SwiftUI
+
+/// Shared hero banner component that can be used across different screens
+struct SharedHeroView<AdditionalContent: View>: View {
+    /// Main title displayed in the hero
+    let title: String
+    
+    /// Optional subtitle displayed below the title
+    let subtitle: String?
+    
+    /// Height of the hero banner
+    let height: CGFloat
+    
+    /// Optional custom content to display above the title
+    let additionalContent: AdditionalContent?
+    
+    /// Whether to animate the gradient overlay
+    let animateGradient: Bool
+    
+    /// Optional custom padding for the bottom content
+    let contentBottomPadding: CGFloat
+    
+    @State private var isAnimating = false
+    
+    /// Initialize with required parameters and optional customizations with additional content
+    init(
+        title: String,
+        subtitle: String? = nil,
+        height: CGFloat = 220,
+        animateGradient: Bool = true,
+        contentBottomPadding: CGFloat = 32,
+        @ViewBuilder additionalContent: () -> AdditionalContent
+    ) {
+        self.title = title
+        self.subtitle = subtitle
+        self.height = height
+        self.animateGradient = animateGradient
+        self.contentBottomPadding = contentBottomPadding
+        self.additionalContent = additionalContent()
+    }
+    
+    /// Initialize without additional content
+    init(
+        title: String,
+        subtitle: String? = nil,
+        height: CGFloat = 220,
+        animateGradient: Bool = true,
+        contentBottomPadding: CGFloat = 32
+    ) where AdditionalContent == EmptyView {
+        self.title = title
+        self.subtitle = subtitle
+        self.height = height
+        self.animateGradient = animateGradient
+        self.contentBottomPadding = contentBottomPadding
+        self.additionalContent = nil
+    }
+    
+    var body: some View {
+        ZStack(alignment: .bottomLeading) {
+            // Background image with gradient overlay
+            Image("runshaw")
+                .resizable()
+                .scaledToFill()
+                .frame(maxWidth: .infinity)
+                .frame(height: height)
+                .clipped()
+                .overlay(
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            Design.Colors.secondary.opacity(0.85),
+                            Design.Colors.secondary.opacity(0.7),
+                            Design.Colors.primary.opacity(animateGradient && isAnimating ? 0.5 : 0.2)
+                        ]),
+                        startPoint: .bottomLeading,
+                        endPoint: .topTrailing
+                    )
+                    .animation(animateGradient ? Animation.easeInOut(duration: 3).repeatForever(autoreverses: true) : nil, value: isAnimating)
+                )
+                .clipShape(
+                    HeroWave()
+                )
+                .shadow(color: Design.Colors.shadowColor, radius: 15, x: 0, y: 5)
+            
+            // Content overlay with custom positioning
+            VStack(alignment: .leading, spacing: 4) {
+                // Optional additional content provided by the caller
+                if let additionalContent = additionalContent {
+                    additionalContent
+                        .padding(.bottom, 8)
+                }
+                
+                // Main title with rich typography
+                Text(title)
+                    .font(.system(size: 38, weight: .bold))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [.white, .white.opacity(0.8)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                    .shadow(color: Color.black.opacity(0.3), radius: 3, x: 0, y: 1)
+                
+                // Optional subtitle
+                if let subtitle = subtitle {
+                    Text(subtitle)
+                        .font(.system(size: Design.Typography.bodySize))
+                        .fontWeight(.medium)
+                        .foregroundStyle(Color.white)
+                }
+                
+                // Decorative element
+                Rectangle()
+                    .fill(Design.Colors.primary)
+                    .frame(width: 60, height: 4)
+                    .padding(.top, 4)
+                    .padding(.bottom, 12)
+            }
+            .padding(.horizontal, 24)
+            .padding(.bottom, contentBottomPadding)
+        }
+        .padding(.bottom, 10)
+        .ignoresSafeArea(edges: .horizontal)
+        .onAppear {
+            if animateGradient {
+                withAnimation {
+                    isAnimating = true
+                }
+            }
+        }
+    }
+}
+
+/// Custom hero shape with stylized bottom edge
+struct HeroWave: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        let width = rect.width
+        let height = rect.height
+        
+        path.move(to: CGPoint(x: 0, y: 0))
+        path.addLine(to: CGPoint(x: width, y: 0))
+        path.addLine(to: CGPoint(x: width, y: height - 40))
+        
+        // Curved bottom edge
+        path.addCurve(
+            to: CGPoint(x: 0, y: height - 20),
+            control1: CGPoint(x: width * 0.75, y: height + 15),
+            control2: CGPoint(x: width * 0.25, y: height - 40)
+        )
+        
+        path.closeSubpath()
+        return path
+    }
+}
+
+/// Date badge component for the home hero
+struct DateBadge: View {
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "calendar")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(.white.opacity(0.9))
+                .padding(.leading, 6)
+            
+            Text("TODAY")
+                .font(.system(size: 14, weight: .heavy))
+                .tracking(2)
+                .foregroundColor(.white.opacity(0.9))
+        }
+        .padding(.vertical, 6)
+        .padding(.horizontal, 8)
+        .background(Design.Colors.primary.opacity(0.8))
+        .clipShape(Capsule())
+        .shadow(color: Design.Colors.shadowColor.opacity(0.5), radius: 5, x: 0, y: 2)
+    }
+}
+
+/// Preview for SharedHeroView
+#Preview {
+    VStack {
+        SharedHeroView(
+            title: "Welcome Back",
+            subtitle: "Check the latest bus arrivals",
+            additionalContent: {
+                DateBadge()
+            }
+        )
+        Spacer()
+    }
+}

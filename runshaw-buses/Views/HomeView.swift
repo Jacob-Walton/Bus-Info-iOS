@@ -43,11 +43,18 @@ struct HomeView: View {
                     }
                 )
                 
-                // Main content with pull-to-refresh
+                // Main content
                 ScrollView {
                     VStack(spacing: 0) {
-                        // Hero banner section
-                        HeroView()
+                        SharedHeroView(
+                            title: "Runshaw Buses",
+                            subtitle: "Check the latest bus arrivals",
+                            height: 220,
+                            contentBottomPadding: 24,
+                            additionalContent: {
+                                DateBadge()
+                            }
+                        )
                         
                         // Error message display
                         if let error = busInfoViewModel.error {
@@ -81,12 +88,11 @@ struct HomeView: View {
                             }
                         }
                         .padding(.horizontal, Design.Spacing.medium)
-                        .padding(.top, Design.Spacing.large)
+                        .padding(.top, Design.Spacing.medium)
                         .padding(.bottom, Design.Spacing.extraLarge)
                     }
                 }
                 .refreshable {
-                    // Native pull-to-refresh functionality
                     await refreshData()
                 }
             }
@@ -115,141 +121,36 @@ struct HomeView: View {
     }
 }
 
-/// Custom navigation header matching website design
 struct CustomNavigationHeader: View {
     let busInfoViewModel: BusInfoViewModel
     let onSignOut: () -> Void
     
     var body: some View {
-        HStack {
-            // Sign out button
-            Button(action: onSignOut) {
-                Image(systemName: "rectangle.portrait.and.arrow.right")
-                    .foregroundStyle(Design.Colors.primary)
-                    .font(.system(size: 18, weight: .medium))
-                    .padding(10)
-                    .background(Design.Colors.background)
-                    .clipShape(UnevenRoundedRectangle.appStyle(radius: Design.Layout.buttonRadius))
-                    .overlay(
-                        UnevenRoundedRectangle.appStyle(radius: Design.Layout.buttonRadius)
-                            .stroke(Design.Colors.border, lineWidth: 1)
-                    )
-            }
-            
-            Spacer()
-            
-            // Logo and title
-            HStack(spacing: Design.Spacing.small) {
-                Image("logo-full")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 32, height: 32)
-                    .clipShape(UnevenRoundedRectangle.appStyle(radius: 8))
-                
-                Text("Runshaw Buses")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(Design.Colors.secondary)
-            }
-            
-            Spacer()
-            
-            // Refresh button
-            Button(action: {
-                busInfoViewModel.fetchBusInfo()
-            }) {
-                Image(systemName: "arrow.clockwise")
-                    .foregroundStyle(Design.Colors.primary)
-                    .font(.system(size: 18, weight: .medium))
-                    .padding(10)
-                    .background(Design.Colors.background)
-                    .clipShape(UnevenRoundedRectangle.appStyle(radius: Design.Layout.buttonRadius))
-                    .overlay(
-                        UnevenRoundedRectangle.appStyle(radius: Design.Layout.buttonRadius)
-                            .stroke(Design.Colors.border, lineWidth: 1)
-                    )
-            }
-        }
-        .padding(.horizontal, Design.Spacing.medium)
-        .padding(.vertical, Design.Spacing.medium)
-        .background(Design.Colors.background)
-        .overlay(
-            Rectangle()
-                .frame(height: 1)
-                .foregroundColor(Design.Colors.border),
-            alignment: .bottom
+        StandardHeader(
+            title: "Runshaw Buses",
+            leftAction: StandardHeader.HeaderAction(
+                iconName: "rectangle.portrait.and.arrow.right", 
+                action: onSignOut
+            ),
+            rightAction: StandardHeader.HeaderAction(
+                iconName: "arrow.clockwise", 
+                action: { busInfoViewModel.fetchBusInfo() }
+            )
         )
-    }
-}
-
-/// Hero banner at the top of the home screen
-struct HeroView: View {
-    var body: some View {
-        ZStack(alignment: .bottomLeading) {
-            // Background image with gradient overlay
-            Image("runshaw")
-                .resizable()
-                .scaledToFill()
-                .frame(maxWidth: .infinity)
-                .frame(height: 200)
-                .clipped()
-                .overlay(
-                    LinearGradient(
-                        gradient: Gradient(colors: [
-                            Design.Colors.secondary.opacity(0.8),
-                            Design.Colors.secondary.opacity(0.6),
-                            Design.Colors.secondary.opacity(0.3)
-                        ]),
-                        startPoint: .bottom,
-                        endPoint: .top
-                    )
-                )
-                .clipShape(
-                    UnevenRoundedRectangle.appStyle(radius: Design.Layout.regularRadius)
-                )
-            
-            // Title overlay
-            VStack(alignment: .leading, spacing: Design.Spacing.small) {
-                Text("Welcome to")
-                    .font(.system(size: Design.Typography.bodySize))
-                    .fontWeight(.medium)
-                    .foregroundStyle(Color.white)
-                
-                Text("Runshaw Buses")
-                    .font(.system(size: Design.Typography.heading4Size, weight: .bold))
-                    .foregroundStyle(Design.Colors.primary)
-            }
-            .padding(Design.Spacing.large)
-        }
-        .padding(.horizontal, Design.Spacing.medium)
-        .padding(.top, Design.Spacing.medium)
     }
 }
 
 /// Empty state view when no buses are available
 struct EmptyBusState: View {
     var body: some View {
-        VStack(spacing: Design.Spacing.medium) {
-            Image(systemName: "bus")
-                .font(.system(size: 40))
-                .foregroundStyle(Design.Colors.darkGrey.opacity(0.6))
-            
-            Text("No buses currently available")
-                .font(.system(size: Design.Typography.bodySize, weight: .medium))
-                .foregroundStyle(Design.Colors.darkGrey)
-                .multilineTextAlignment(.center)
-                
-            Text("Pull down to refresh")
-                .font(.system(size: 14))
-                .foregroundStyle(Design.Colors.darkGrey)
-                .multilineTextAlignment(.center)
-        }
-        .padding(Design.Spacing.large)
-        .frame(maxWidth: .infinity)
-        .background(Design.Colors.background)
-        .clipShape(UnevenRoundedRectangle.appStyle(radius: Design.Layout.regularRadius))
-        .overlay(
-            UnevenRoundedRectangle.appStyle(radius: Design.Layout.regularRadius)
-                .stroke(Design.Colors.border, lineWidth: 1)
+        StandardEmptyStateView(
+            iconName: "bus",
+            message: "No buses currently available",
+            submessage: "Pull down to refresh",
+            actionTitle: "Refresh Now",
+            action: {
+                // This would trigger a refresh
+            }
         )
     }
 }
@@ -300,7 +201,7 @@ struct BusListView: View {
 
 /// Information section showing last update time
 struct InfoSection: View {
-    /// Formatted last updated timestamp - already processed by BusInfoViewModel
+    /// Formatted last updated timestamp
     let lastUpdated: String
     
     var body: some View {
@@ -473,18 +374,7 @@ struct LoadingOverlay: View {
             Color.black.opacity(0.1)
                 .ignoresSafeArea()
             
-            VStack(spacing: Design.Spacing.medium) {
-                ProgressView()
-                    .scaleEffect(1.5)
-                    .progressViewStyle(CircularProgressViewStyle(tint: Design.Colors.primary))
-                
-                Text("Loading...")
-                    .foregroundStyle(Design.Colors.darkGrey)
-                    .font(.system(size: 16, weight: .medium))
-            }
-            .padding(Design.Spacing.large)
-            .background(Design.Colors.background.opacity(0.9))
-            .clipShape(UnevenRoundedRectangle.appStyle(radius: Design.Layout.regularRadius))
+            StandardLoadingIndicator()
         }
     }
 }
