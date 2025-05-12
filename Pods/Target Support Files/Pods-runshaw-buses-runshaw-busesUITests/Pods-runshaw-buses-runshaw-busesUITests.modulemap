@@ -1,0 +1,6 @@
+framework module Pods_runshaw_buses_runshaw_busesUITests {
+  umbrella header "Pods-runshaw-buses-runshaw-busesUITests-umbrella.h"
+
+  export *
+  module * { export * }
+}

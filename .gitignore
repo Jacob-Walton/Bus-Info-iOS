@@ -19,9 +19,6 @@ xcuserdata/
 .build/
 Package.resolved
 
-# CocoaPods
-Pods/
-
 # Carthage
 Carthage/
 Carthage/Build/
