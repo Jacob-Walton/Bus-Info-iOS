@@ -24,6 +24,9 @@ struct LoginView: View {
     /// Current size class for responsive layout adjustments
     @SwiftUI.Environment(\.horizontalSizeClass) private var horizontalSizeClass
     
+    /// Controls visibility of the registration view
+    @State private var showRegisterView: Bool = false
+    
     /// Initialize with dependencies
     init(webAuthService: WebAuthenticationServiceProtocol = WebAuthenticationService.shared) {
         self.webAuthService = webAuthService
@@ -92,8 +95,10 @@ struct LoginView: View {
                         }
                         .padding(.horizontal, Design.Spacing.medium * 1.5)
                         
-                        CreateAccountButton()
-                            .padding(.top, Design.Spacing.medium)
+                        CreateAccountButton {
+                            showRegisterView = true
+                        }
+                        .padding(.top, Design.Spacing.medium)
                     }
                     .padding(.vertical, Design.Spacing.large)
                     .frame(minHeight: geometry.size.height)
@@ -103,6 +108,10 @@ struct LoginView: View {
                 }
             }
             .background(Design.Colors.background)
+            .sheet(isPresented: $showRegisterView) {
+                RegisterView()
+                    .environmentObject(authViewModel)
+            }
         }
         .sheet(isPresented: $showReactivationModal) {
             ReactivationModalView(

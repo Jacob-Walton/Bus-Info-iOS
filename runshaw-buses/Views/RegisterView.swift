@@ -83,8 +83,10 @@ struct RegisterView: View {
                                 type: .password
                             )
                             
+                            // TODO: Make checkbox a modular component and add terms/independence disclaimer agreement
+                            
                             AppButton(
-                                title: "Sign In",
+                                title: "Register",
                                 isLoading:
                                     authViewModel.isAuthenticating
                             ) {
@@ -126,7 +128,9 @@ struct RegisterView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     RegisterView()
         .environmentObject(AuthViewModel(authService: MockAuthService(), keychainService: MockKeychainService()))
 }
+#endif

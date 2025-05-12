@@ -6,7 +6,7 @@ struct AppLogo: View {
         Image("logo-full")
             .resizable()
             .scaledToFit()
-            .frame(width: 150, height: 150)
+            .frame(width: 100, height: 100)
             .clipShape(UnevenRoundedRectangle.appStyle(radius: Design.Layout.regularRadius))
             .padding(.bottom, Design.Spacing.small)
     }
@@ -24,9 +24,16 @@ struct WelcomeHeader: View {
 
 /// Button for creating a new account
 struct CreateAccountButton: View {
+    /// Action to perform when button is tapped
+    let action: () -> Void
+    
+    init(action: @escaping () -> Void = {}) {
+        self.action = action
+    }
+    
     var body: some View {
         IconTextButton(iconName: "person.badge.plus", label: "Create new account") {
-            // Navigation to register screen will be implemented here
+            action()
         }
         .padding(.top, Design.Spacing.medium)
     }
