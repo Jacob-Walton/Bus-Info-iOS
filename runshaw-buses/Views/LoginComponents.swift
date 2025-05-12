@@ -1,11 +1,3 @@
-//
-//  LoginComponents.swift
-//  runshaw-buses
-//
-//  Created by Jacob on 03/05/2025.
-//  Copyright © 2025 Konpeki. All rights reserved.
-//
-
 import SwiftUI
 
 /// Displays the app logo with styling
@@ -14,7 +6,7 @@ struct AppLogo: View {
         Image("logo-full")
             .resizable()
             .scaledToFit()
-            .frame(width: 100, height: 100)
+            .frame(width: 150, height: 150)
             .clipShape(UnevenRoundedRectangle.appStyle(radius: Design.Layout.regularRadius))
             .padding(.bottom, Design.Spacing.small)
     }

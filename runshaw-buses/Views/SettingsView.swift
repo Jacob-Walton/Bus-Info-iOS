@@ -1,25 +1,34 @@
-//
-//  SettingsView.swift
-//  runshaw-buses
-//
-//  Created by Jacob on 03/05/2025.
-//  Copyright © 2025 Konpeki. All rights reserved.
-//
-
 import SwiftUI
 
 /// Settings view for configuring app preferences and account options
 struct SettingsView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
-    @EnvironmentObject var notificationService: NotificationService // Assuming this exists and is needed for notifications
+    @EnvironmentObject var notificationService: NotificationService
+    
+    /// Use StateObject with a default value as a fallback if environment object is missing
+    @StateObject private var fallbackBusInfoViewModel = BusInfoViewModel.create()
+    
+    /// Optional environment object that might not be provided
+    @EnvironmentObject private var injectedBusInfoViewModel: BusInfoViewModel
+    
+    /// Computed property to use injected view model if available, fallback otherwise
+    private var busInfoViewModel: BusInfoViewModel {
+        let mirror = Mirror(reflecting: self)
+        // Check if environment object was actually injected by seeing if it's initialized
+        if mirror.children.contains(where: { $0.label == "_injectedBusInfoViewModel" && $0.value as? BusInfoViewModel != nil }) {
+            return injectedBusInfoViewModel
+        } else {
+            print("Warning: Using fallback BusInfoViewModel because none was injected via environment")
+            return fallbackBusInfoViewModel
+        }
+    }
     
     // Settings state
     @State private var enableNotifications = true // TODO: Link to actual notificationService.isSubscribed or similar
     @State private var showPreferredRoutesSeparately = true // TODO: Implement persistence and logic
-    @State private var preferredRoutes: [String] = ["123", "160", "782"] // TODO: Load from user preferences
+    @State private var preferredRoutes: [String] = ["809", "819", "821"] // TODO: Load from user preferences
     
     @State private var isAddingRoute = false
-    private let allAvailableRoutes = ["101", "108", "109", "115", "123", "128", "137", "142", "143", "160", "765", "782"] // Example data
 
     var body: some View {
         ZStack {
@@ -33,7 +42,7 @@ struct SettingsView: View {
                         SharedHeroView(
                             title: "Settings",
                             subtitle: "Customize your app experience",
-                            height: 180 // Adjusted height
+                            height: 220
                         )
                         
                         VStack(spacing: Design.Spacing.large) {
@@ -159,8 +168,7 @@ struct SettingsView: View {
                 .font(.system(size: Design.Typography.heading5Size, weight: .semibold))
                 .foregroundStyle(Design.Colors.secondary)
 
-            VStack(alignment: .leading, spacing: 0) { // Use spacing 0 and rely on padding/dividers
-                // Email
+            VStack(alignment: .leading, spacing: 0) {
                 if let user = authViewModel.currentUser {
                     HStack {
                         Image(systemName: "envelope.fill")
@@ -191,9 +199,7 @@ struct SettingsView: View {
                 }
                 .padding(Design.Spacing.medium)
                 
-                // Sign Out is handled by the header in HomeView, but can be added here if desired
-                // For consistency with HomeView, it might be better to keep sign out in one primary location (header)
-                // or make this a more prominent "destructive action" button if included.
+                // TODO: Add sign out button after adding primaryDestructive type
             }
             .background(Design.Colors.background)
             .clipShape(UnevenRoundedRectangle.appStyle(radius: Design.Layout.regularRadius))
@@ -211,7 +217,10 @@ struct SettingsView: View {
                 .foregroundStyle(Design.Colors.secondary)
 
             VStack(alignment: .leading, spacing: 0) {
-                aboutRow(icon: "envelope.fill", text: authViewModel.currentUser?.email ?? "support@runshawbuses.app", isLink: true, action: { /* TODO: Open mail client */ })
+                aboutRow(icon: "envelope.fill", text: "support@konpeki.co.uk", isLink: true, action: {
+                    // Open email client
+                    UIApplication.shared.open(URL(string: "mailto:support@konpeki.co.uk")!)
+                })
                 Divider()
                 aboutRow(icon: "doc.text.fill", text: "Privacy Policy", isLink: true, action: { /* TODO: Open Privacy Policy URL */ })
                 Divider()
@@ -272,7 +281,7 @@ struct SettingsView: View {
                     .foregroundColor(isLink ? Design.Colors.primary : Design.Colors.text)
                 Spacer()
                 if isLink {
-                    Image(systemName: "arrow.up.right.square") // Icon to indicate external link/action
+                    Image(systemName: "arrow.up.right.square")
                         .foregroundColor(Design.Colors.darkGrey.opacity(0.7))
                 }
             }
@@ -284,18 +293,29 @@ struct SettingsView: View {
     private var routePickerSheet: some View {
         NavigationView {
             List {
-                Section(header: Text("Available Routes")) {
-                    ForEach(allAvailableRoutes.filter { !preferredRoutes.contains($0) }, id: \.self) { route in
-                        Button(action: {
-                            addRoute(route)
-                            isAddingRoute = false
-                        }) {
-                            HStack {
-                                Text("Bus \(route)")
-                                    .foregroundColor(Design.Colors.text) // Ensure text is visible
-                                Spacer()
-                                Image(systemName: "plus.circle.fill")
-                                    .foregroundColor(Design.Colors.primary)
+                if busInfoViewModel.isLoadingRoutes {
+                    HStack {
+                        ProgressView()
+                            .padding(.trailing, 10)
+                        Text("Loading available routes...")
+                    }
+                } else if let error = busInfoViewModel.routesError {
+                    Text("Error: \(error)")
+                        .foregroundColor(.red)
+                } else {
+                    Section(header: Text("Available Routes")) {
+                        ForEach(busInfoViewModel.availableBusRoutes.filter { !preferredRoutes.contains($0) }, id: \.self) { route in
+                            Button(action: {
+                                addRoute(route)
+                                isAddingRoute = false
+                            }) {
+                                HStack {
+                                    Text("Bus \(route)")
+                                        .foregroundColor(Design.Colors.text)
+                                    Spacer()
+                                    Image(systemName: "plus.circle.fill")
+                                        .foregroundColor(Design.Colors.primary)
+                                }
                             }
                         }
                     }
@@ -308,7 +328,13 @@ struct SettingsView: View {
                     Button("Cancel") {
                         isAddingRoute = false
                     }
-                    .foregroundColor(Design.Colors.primary) // Style cancel button
+                    .foregroundColor(Design.Colors.primary)
+                }
+            }
+            .onAppear {
+                // Refresh routes when the picker appears
+                if busInfoViewModel.availableBusRoutes.isEmpty {
+                    busInfoViewModel.fetchAvailableBusRoutes()
                 }
             }
         }
@@ -341,15 +367,15 @@ struct RouteChip: View {
     let onRemove: () -> Void
     
     var body: some View {
-        HStack(spacing: Design.Spacing.tiny) { // Reduced spacing
+        HStack(spacing: Design.Spacing.tiny) {
             Text(route)
                 .font(.system(size: 14, weight: .medium))
-                .foregroundColor(Design.Colors.background) // Text color for contrast
+                .foregroundColor(Design.Colors.background)
             
             Button(action: onRemove) {
-                Image(systemName: "xmark.circle.fill") // Changed to filled icon for better tap target
-                    .font(.system(size: 16)) // Slightly larger icon
-                    .foregroundColor(Design.Colors.background.opacity(0.7)) // Subtle remove icon
+                Image(systemName: "xmark.circle.fill")
+                    .font(.system(size: 16))
+                    .foregroundColor(Design.Colors.background.opacity(0.7))
             }
         }
         .padding(.horizontal, Design.Spacing.small)

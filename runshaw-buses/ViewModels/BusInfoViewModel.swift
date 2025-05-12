@@ -12,6 +12,11 @@ class BusInfoViewModel: ObservableObject {
     @Published var mapUrl: URL?
     @Published var filterText: String = "" // Text used to filter the list of buses
     
+    // Bus routes for picker
+    @Published var availableBusRoutes: [String] = []
+    @Published var isLoadingRoutes: Bool = false
+    @Published var routesError: String?
+    
     private var allSortedBusKeys: [String] = [] // Stores all bus keys, sorted, before any filtering is applied
     private var busInfoService: BusInfoServiceProtocol
     private var cancellables = Set<AnyCancellable>()
@@ -41,6 +46,9 @@ class BusInfoViewModel: ObservableObject {
                 self?.updateFilteredBusKeys()
             }
             .store(in: &cancellables)
+        
+        // Fetch available bus routes
+        fetchAvailableBusRoutes()
     }
     
     deinit {
@@ -237,6 +245,47 @@ class BusInfoViewModel: ObservableObject {
         
         // Return status if present, otherwise "Unknown"
         return bus.status ?? "Unknown"
+    }
+    
+    /// Fetch available bus routes from the API
+    func fetchAvailableBusRoutes() {
+        isLoadingRoutes = true
+        routesError = nil
+        
+        busInfoService.getBusRoutes()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] completion in
+                guard let self = self else { return }
+                self.isLoadingRoutes = false
+                
+                if case .failure(let error) = completion {
+                    self.routesError = "Failed to load bus routes: \(error.localizedDescription)"
+                    print("Error fetching bus routes: \(error.localizedDescription)")
+                    
+                    // Fallback to some default routes if API fails
+                    if self.availableBusRoutes.isEmpty {
+                        self.availableBusRoutes = ["101", "108", "109", "115", "123", "160", "765", "782"]
+                    }
+                }
+            } receiveValue: { [weak self] routes in
+                guard let self = self else { return }
+                
+                print("Received \(routes.count) bus routes from API")
+                
+                // Sort route numbers for consistent display
+                let sorted = routes.sorted { (lhs, rhs) -> Bool in
+                    // Try to sort numerically if possible
+                    if let leftNum = Int(lhs.filter { $0.isNumber }),
+                       let rightNum = Int(rhs.filter { $0.isNumber }) {
+                        return leftNum < rightNum
+                    }
+                    // Otherwise sort alphabetically
+                    return lhs < rhs
+                }
+                
+                self.availableBusRoutes = sorted
+            }
+            .store(in: &cancellables)
     }
 }
 

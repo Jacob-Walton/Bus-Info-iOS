@@ -29,3 +29,9 @@ struct AppleTokenExchangeRequest: Codable {
 struct TokenValidationResponse: Codable {
     let isValid: Bool
 }
+
+struct UserPreferences: Codable {
+    let pushNotificationsEnabled: Bool
+    let showPreferredRoutesSeparately: Bool
+    let preferredRoutes: [String]
+}

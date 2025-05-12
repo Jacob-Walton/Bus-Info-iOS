@@ -23,4 +23,7 @@ protocol AuthServiceProtocol {
 
     /// Get current user's profile
     func getUserProfile() -> AnyPublisher<User, NetworkError>
+    
+    /// Get current user's preferences
+    func getUserPreferences() -> AnyPublisher<UserPreferences, NetworkError>
 }

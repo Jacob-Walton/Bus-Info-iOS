@@ -1,11 +1,3 @@
-//
-//  LoginView.swift
-//  runshaw-buses
-//
-//  Created by Jacob on 03/05/2025.
-//  Copyright © 2025 Konpeki. All rights reserved.
-//
-
 import SwiftUI
 import AuthenticationServices
 import GoogleSignIn

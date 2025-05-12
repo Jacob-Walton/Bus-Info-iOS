@@ -35,6 +35,20 @@ class BusInfoService: BusInfoServiceProtocol {
         // Construct the URL and return
         return URL(string: ConfigurationManager.shared.currentConfig.baseURL.absoluteString + "/api/v2/businfo/map?token=\(token)&uuid=\(UUID())")
     }
+    
+    func getBusRoutes() -> AnyPublisher<[String], NetworkError> {
+        // Get the auth token from keychain
+        guard (keychainService.getAuthToken()) != nil else {
+            return Fail(error: NetworkError.unauthorized).eraseToAnyPublisher()
+        }
+
+        // Make the network request
+        return networkService.request(
+            endpoint: "api/v2/businfo/list",
+            method: .get,
+            authType: .bearer
+        )
+    }
 }
 
 // MARK: - Factory Method
@@ -50,9 +64,14 @@ extension BusInfoService {
 #if DEBUG
 class MockBusInfoService: BusInfoServiceProtocol {
     var mockBusInfoResponse: Result<BusInfoResponse, NetworkError> = .failure(.unexpectedError(NSError()))
+    var mockBusRoutesResponse: Result<[String], NetworkError> = .failure(.unexpectedError(NSError()))
     
     func getBusInfo() -> AnyPublisher<BusInfoResponse, NetworkError> {
         return mockBusInfoResponse.publisher.eraseToAnyPublisher()
+    }
+    
+    func getBusRoutes() -> AnyPublisher<[String], NetworkError> {
+        return mockBusRoutesResponse.publisher.eraseToAnyPublisher()
     }
     
     /// Set a mock bus info response with specific bus data
@@ -63,6 +82,11 @@ class MockBusInfoService: BusInfoServiceProtocol {
             status: status
         )
         mockBusInfoResponse = .success(response)
+    }
+    
+    /// Set mock bus routes for testing
+    func setMockBusRoutes(_ routes: [String]) {
+        mockBusRoutesResponse = .success(routes)
     }
     
     func setMockSampleBusInfo() {

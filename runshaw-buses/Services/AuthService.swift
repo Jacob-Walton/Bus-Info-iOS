@@ -70,6 +70,10 @@ class AuthService: AuthServiceProtocol {
     func getUserProfile() -> AnyPublisher<User, NetworkError> {
         return networkService.request(endpoint: "api/accounts/profile", method: .get)
     }
+    
+    func getUserPreferences() -> AnyPublisher<UserPreferences, NetworkError> {
+        return Fail(error: NetworkError.invalidResponse).eraseToAnyPublisher()
+    }
 }
 
 // MARK: - Factory Method
@@ -123,6 +127,10 @@ class MockAuthService: AuthServiceProtocol {
     
     func getUserProfile() -> AnyPublisher<User, NetworkError> {
         return mockUserProfileResponse.publisher.eraseToAnyPublisher()
+    }
+    
+    func getUserPreferences() -> AnyPublisher<UserPreferences, NetworkError> {
+        fatalError("Not implemented")
     }
 }
 #endif

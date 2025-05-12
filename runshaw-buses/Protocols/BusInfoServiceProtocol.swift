@@ -7,4 +7,7 @@ protocol BusInfoServiceProtocol {
     
     /// Fetch bus info map URL with token
     func getBusMapUrl() throws -> URL?
+    
+    /// Fetch list of available bus routes
+    func getBusRoutes() -> AnyPublisher<[String], NetworkError>
 }
