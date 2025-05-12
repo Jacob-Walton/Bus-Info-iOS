@@ -57,7 +57,7 @@ struct SharedHeroView<AdditionalContent: View>: View {
     
     var body: some View {
         ZStack(alignment: .bottomLeading) {
-            // Background image with gradient overlay
+            // Background image
             Image("runshaw")
                 .resizable()
                 .scaledToFill()
@@ -81,15 +81,14 @@ struct SharedHeroView<AdditionalContent: View>: View {
                 )
                 .shadow(color: Design.Colors.shadowColor, radius: 15, x: 0, y: 5)
             
-            // Content overlay with custom positioning
+            // Content overlay
             VStack(alignment: .leading, spacing: 4) {
-                // Optional additional content provided by the caller
                 if let additionalContent = additionalContent {
                     additionalContent
                         .padding(.bottom, 8)
                 }
                 
-                // Main title with rich typography
+                // Main title
                 Text(title)
                     .font(.system(size: 38, weight: .bold))
                     .foregroundStyle(
@@ -117,7 +116,7 @@ struct SharedHeroView<AdditionalContent: View>: View {
                     .padding(.bottom, 12)
             }
             .padding(.horizontal, 24)
-            .padding(.bottom, contentBottomPadding)
+            .padding(.bottom, height * 0.25)
         }
         .padding(.bottom, 10)
         .ignoresSafeArea(edges: .horizontal)
@@ -154,37 +153,12 @@ struct HeroWave: Shape {
     }
 }
 
-/// Date badge component for the home hero
-struct DateBadge: View {
-    var body: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "calendar")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(.white.opacity(0.9))
-                .padding(.leading, 6)
-            
-            Text("TODAY")
-                .font(.system(size: 14, weight: .heavy))
-                .tracking(2)
-                .foregroundColor(.white.opacity(0.9))
-        }
-        .padding(.vertical, 6)
-        .padding(.horizontal, 8)
-        .background(Design.Colors.primary.opacity(0.8))
-        .clipShape(Capsule())
-        .shadow(color: Design.Colors.shadowColor.opacity(0.5), radius: 5, x: 0, y: 2)
-    }
-}
-
 /// Preview for SharedHeroView
 #Preview {
     VStack {
         SharedHeroView(
             title: "Welcome Back",
             subtitle: "Check the latest bus arrivals",
-            additionalContent: {
-                DateBadge()
-            }
         )
         Spacer()
     }

@@ -19,6 +19,9 @@ struct HomeView: View {
     /// View model for bus information and status
     @StateObject private var busInfoViewModel: BusInfoViewModel
     
+    /// Image ID for force reloading
+    @State var imageId: UUID = UUID()
+    
     /// Initialize with dependencies
     init(busInfoViewModel: BusInfoViewModel? = nil) {
         // Use provided view model or create a new one using factory
@@ -35,7 +38,6 @@ struct HomeView: View {
             Design.Colors.lightGrey.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Custom navigation header instead of NavigationStack
                 CustomNavigationHeader(
                     busInfoViewModel: busInfoViewModel,
                     onSignOut: {
@@ -50,10 +52,6 @@ struct HomeView: View {
                             title: "Runshaw Buses",
                             subtitle: "Check the latest bus arrivals",
                             height: 220,
-                            contentBottomPadding: 24,
-                            additionalContent: {
-                                DateBadge()
-                            }
                         )
                         
                         // Error message display
@@ -65,19 +63,58 @@ struct HomeView: View {
                         
                         // Main content sections
                         VStack(spacing: Design.Spacing.large) {
-                            // Bus status section
-                            VStack(alignment: .leading, spacing: Design.Spacing.small) {
-                                Text("Bus Status")
-                                    .font(.system(size: Design.Typography.heading5Size, weight: .semibold))
-                                    .foregroundStyle(Design.Colors.secondary)
+                            
+                            // Bus Status section header (moved outside the card)
+                            Text("Bus Status")
+                                .font(.system(size: Design.Typography.heading5Size, weight: .semibold))
+                                .foregroundStyle(Design.Colors.secondary)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.horizontal, Design.Spacing.small)
+                            
+                            // Card containing search and bus list
+                            VStack(alignment: .leading, spacing: Design.Spacing.medium) {
+                                // Search section with icon and label
+                                VStack(alignment: .leading, spacing: 4) {
+                                    HStack {
+                                        Image(systemName: "magnifyingglass")
+                                            .foregroundStyle(Design.Colors.primary)
+                                        Text("Filter Buses")
+                                            .font(.system(size: 14, weight: .medium))
+                                            .foregroundStyle(Design.Colors.darkGrey)
+                                    }
+                                    
+                                    AppTextField(label: "", placeholder: "Enter bus number...", text: $busInfoViewModel.filterText)
+                                        .keyboardType(.numberPad)
+                                        .toolbar {
+                                            ToolbarItemGroup(placement: .keyboard) {
+                                                Spacer()
+                                                Button("Done") {
+                                                    hideKeyboard()
+                                                }
+                                            }
+                                        }
+                                }
                                 
-                                // Display bus list or empty state
-                                if busInfoViewModel.sortedBusKeys.isEmpty && !busInfoViewModel.isLoading {
-                                    EmptyBusState()
-                                } else {
-                                    BusListView(busInfoViewModel: busInfoViewModel)
+                                // Divider between search and results
+                                Divider()
+                                    .padding(.vertical, 4)
+                                
+                                // Results section
+                                VStack(alignment: .leading, spacing: Design.Spacing.small) {
+                                    if busInfoViewModel.allBusKeysCount == 0 && !busInfoViewModel.isLoading && busInfoViewModel.filterText.isEmpty {
+                                        EmptyBusState()
+                                    } else {
+                                        BusListView(busInfoViewModel: busInfoViewModel)
+                                    }
                                 }
                             }
+                            .padding(Design.Spacing.medium)
+                            .background(Design.Colors.background)
+                            .clipShape(UnevenRoundedRectangle.appStyle(radius: Design.Layout.regularRadius))
+                            .overlay(
+                                UnevenRoundedRectangle.appStyle(radius: Design.Layout.regularRadius)
+                                    .stroke(Design.Colors.border, lineWidth: 1)
+                            )
                             
                             // Last updated information
                             InfoSection(lastUpdated: busInfoViewModel.formattedLastUpdated())
@@ -85,6 +122,7 @@ struct HomeView: View {
                             // Bus map section
                             if let mapUrl = busInfoViewModel.mapUrl {
                                 BusMapView(mapUrl: mapUrl)
+                                    .id(imageId)
                             }
                         }
                         .padding(.horizontal, Design.Spacing.medium)
@@ -113,12 +151,19 @@ struct HomeView: View {
         // Use Task to call the non-async fetchBusInfo
         await withCheckedContinuation { continuation in
             busInfoViewModel.fetchBusInfo()
+            // Refresh image
+            imageId = UUID()
             // Minimum delay for a visible refresh animation
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 continuation.resume()
             }
         }
     }
+}
+
+/// Helper function to dismiss the keyboard
+private func hideKeyboard() {
+    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
 }
 
 struct CustomNavigationHeader: View {
@@ -149,7 +194,7 @@ struct EmptyBusState: View {
             submessage: "Pull down to refresh",
             actionTitle: "Refresh Now",
             action: {
-                // This would trigger a refresh
+                // TODO: Implement refresh action
             }
         )
     }
@@ -162,40 +207,55 @@ struct BusListView: View {
     
     var body: some View {
         VStack(spacing: Design.Spacing.small) {
+            // busInfoViewModel.sortedBusKeys is now filtered
             if busInfoViewModel.sortedBusKeys.isEmpty {
-                Text("No buses available")
-                    .foregroundColor(.red)
-                    .padding()
+                if !busInfoViewModel.filterText.isEmpty {
+                    Text("No buses match your search: \"\(busInfoViewModel.filterText)\"")
+                        .foregroundColor(Design.Colors.darkGrey)
+                        .padding()
+                        .frame(maxWidth: .infinity, minHeight: 100, alignment: .center)
+                } else if busInfoViewModel.allBusKeysCount > 0 { // No search text, but still no results (e.g. all buses departed)
+                     Text("No buses currently available to display.")
+                        .foregroundColor(Design.Colors.darkGrey)
+                        .padding()
+                        .frame(maxWidth: .infinity, minHeight: 100, alignment: .center)
+                }
+                // If allBusKeysCount is 0 and filter is empty, EmptyBusState in HomeView handles it.
             } else {
-                // Bus count indicator
-                Text("Total buses: \(busInfoViewModel.sortedBusKeys.count)")
+                // Bus count indicator (shows filtered count vs total)
+                Text("Showing \(busInfoViewModel.sortedBusKeys.count) of \(busInfoViewModel.allBusKeysCount) buses")
                     .font(.caption)
                     .foregroundColor(.gray)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.bottom, 4)
                 
                 // Bus list
-                ForEach(busInfoViewModel.sortedBusKeys, id: \.self) { busNumber in
-                    BusStatusRow(
-                        busNumber: busNumber,
-                        isArrived: busInfoViewModel.isBusArrived(busNumber: busNumber),
-                        bay: busInfoViewModel.getBayForBus(busNumber: busNumber),
-                        status: busInfoViewModel.getStatusForBus(busNumber: busNumber)
-                    )
-                    
-                    if busInfoViewModel.sortedBusKeys.last != busNumber {
-                        Divider()
+                ScrollView {
+                    // ForEach now iterates over the filtered list from busInfoViewModel.sortedBusKeys
+                    ForEach(busInfoViewModel.sortedBusKeys, id: \.self) { busNumber in
+                        BusStatusRow(
+                            busNumber: busNumber,
+                            isArrived: busInfoViewModel.isBusArrived(busNumber: busNumber),
+                            bay: busInfoViewModel.getBayForBus(busNumber: busNumber),
+                            status: busInfoViewModel.getStatusForBus(busNumber: busNumber)
+                        )
+                        
+                        // Divider logic also uses the filtered list
+                        if busInfoViewModel.sortedBusKeys.last != busNumber {
+                            Divider()
+                        }
                     }
-                }
+                }.frame(maxHeight: 400) // Max height for the scrollable list content
             }
         }
-        .padding(Design.Spacing.medium)
-        .background(Design.Colors.background)
-        .clipShape(UnevenRoundedRectangle.appStyle(radius: Design.Layout.regularRadius))
-        .overlay(
-            UnevenRoundedRectangle.appStyle(radius: Design.Layout.regularRadius)
-                .stroke(Design.Colors.border, lineWidth: 1)
-        )
+        // Removed card-like modifiers from here, as they are now on the parent container in HomeView
+        // .padding(Design.Spacing.medium)
+        // .background(Design.Colors.background)
+        // .clipShape(UnevenRoundedRectangle.appStyle(radius: Design.Layout.regularRadius))
+        // .overlay(
+        //     UnevenRoundedRectangle.appStyle(radius: Design.Layout.regularRadius)
+        //         .stroke(Design.Colors.border, lineWidth: 1)
+        // )
     }
 }
 
@@ -414,6 +474,8 @@ struct HomeView_Previews: PreviewProvider {
         let busInfoViewModel = BusInfoViewModel(
             busInfoService: mockBusInfoService
         )
+        // Example: To test filtering in preview
+        // busInfoViewModel.filterText = "12"
         
         // Add sample notifications
         mockNotificationService.addSampleNotifications()

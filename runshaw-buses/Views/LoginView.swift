@@ -41,15 +41,6 @@ struct LoginView: View {
         GeometryReader { geometry in
             ScrollView {
                 VStack(spacing: 0) {
-                    // Updated hero with SharedHeroView
-                    SharedHeroView(
-                        title: "Welcome Back",
-                        subtitle: "Sign in to check bus status",
-                        height: 180,
-                        contentBottomPadding: 24
-                    )
-                    .padding(.bottom, Design.Spacing.medium)
-                    
                     VStack(alignment: .center) {
                         // App logo
                         AppLogo()
@@ -66,14 +57,15 @@ struct LoginView: View {
                             AppTextField(
                                 label: "Email",
                                 placeholder: "Enter your email",
-                                text: $username
+                                text: $username,
+                                type: .emailAddress
                             )
                             
                             AppTextField(
                                 label: "Password",
                                 placeholder: "Enter your password",
                                 text: $password,
-                                isSecure: true
+                                type: .password
                             )
                             
                             RememberMeRow(isChecked: $rememberMe)
@@ -112,7 +104,7 @@ struct LoginView: View {
                             .padding(.top, Design.Spacing.medium)
                     }
                     .padding(.vertical, Design.Spacing.large)
-                    .frame(minHeight: geometry.size.height - 180)  // Adjust for hero height
+                    .frame(minHeight: geometry.size.height)
                     .frame(maxWidth: 400)
                     .frame(maxWidth: .infinity)
                     .background(Design.Colors.background)

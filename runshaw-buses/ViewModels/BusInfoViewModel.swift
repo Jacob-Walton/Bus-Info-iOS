@@ -9,8 +9,10 @@ class BusInfoViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var error: String?
     @Published var sortedBusKeys: [String] = []
-    @Published var mapUrl: URL? = URL(string: ConfigurationManager.shared.currentConfig.baseURL.absoluteString + "/api/v2/businfo/map")
+    @Published var mapUrl: URL?
+    @Published var filterText: String = "" // Text used to filter the list of buses
     
+    private var allSortedBusKeys: [String] = [] // Stores all bus keys, sorted, before any filtering is applied
     private var busInfoService: BusInfoServiceProtocol
     private var cancellables = Set<AnyCancellable>()
     private var refreshTimer: Timer?
@@ -25,8 +27,20 @@ class BusInfoViewModel: ObservableObject {
         // Set up auto-refresh
         setupRefreshTimer()
         
+        // Update bus map
+        updateBusMap()
+        
         // Log the map URL being used
         print("Current map URL: \(mapUrl?.absoluteString ?? "Unknown")")
+
+        // Observe changes to filterText to update the displayed list of buses.
+        // Includes a debounce to prevent rapid updates during typing.
+        $filterText
+            .debounce(for: .milliseconds(100), scheduler: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.updateFilteredBusKeys()
+            }
+            .store(in: &cancellables)
     }
     
     deinit {
@@ -37,6 +51,16 @@ class BusInfoViewModel: ObservableObject {
         refreshTimer?.invalidate()
         refreshTimer = Timer.scheduledTimer(withTimeInterval: refreshInterval, repeats: true) { [weak self] _ in
             self?.fetchBusInfo()
+        }
+    }
+    
+    func updateBusMap() {
+        do {
+            try mapUrl = busInfoService.getBusMapUrl()
+        } catch NetworkError.unauthorized {
+            print("Failed to fetch mapUrl from BusInfoService: Unauthorized")
+        } catch {
+            print("Unexpected error occured when trying to fetch bus map URL: \(error.localizedDescription)")
         }
     }
     
@@ -83,18 +107,39 @@ class BusInfoViewModel: ObservableObject {
                     return lhs < rhs
                 }
                 
-                print("Setting sorted keys to \(sorted.count) buses")
+                print("Setting allSortedBusKeys to \(sorted.count) buses")
+                self.allSortedBusKeys = sorted // Update the complete list of sorted bus keys
                 
                 // Force update on main thread and ensure UI refreshes
                 DispatchQueue.main.async {
-                    self.sortedBusKeys = sorted
+                    self.updateFilteredBusKeys() // Apply current filter to the newly fetched data
                     print("Keys set: \(self.sortedBusKeys.count)")
+                    
+                    // Update bus map URL
+                    self.updateBusMap()
                     
                     // Force a UI refresh
                     self.objectWillChange.send()
                 }
             }
             .store(in: &cancellables)
+    }
+
+    /// Updates `sortedBusKeys` based on the current `filterText`.
+    /// If `filterText` is empty, all buses are shown; otherwise, it performs a case-insensitive search.
+    private func updateFilteredBusKeys() {
+        if filterText.isEmpty {
+            sortedBusKeys = allSortedBusKeys
+        } else {
+            // Perform a case-insensitive search for bus numbers containing the filter text
+            sortedBusKeys = allSortedBusKeys.filter { $0.localizedCaseInsensitiveContains(filterText) }
+        }
+        // self.objectWillChange.send() // Not strictly necessary if sortedBusKeys is @Published
+    }
+
+    /// The total number of buses fetched, before any filtering.
+    var allBusKeysCount: Int {
+        return busData.count
     }
 
     // Format the last updated timestamp into a readable string

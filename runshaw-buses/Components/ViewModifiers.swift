@@ -10,7 +10,6 @@ struct PrimaryButtonStyle: ViewModifier {
             .background(Design.Colors.primary)
             .foregroundStyle(.white)
             .clipShape(UnevenRoundedRectangle.appStyle(radius: Design.Layout.buttonRadius))
-            .shadow(color: Design.Colors.primary.opacity(0.3), radius: 5, x: 0, y: 2)
     }
 }
 
@@ -22,7 +21,6 @@ struct SecondaryButtonStyle: ViewModifier {
             .background(Design.Colors.secondary)
             .foregroundStyle(.white)
             .clipShape(UnevenRoundedRectangle.appStyle(radius: Design.Layout.buttonRadius))
-            .shadow(color: Design.Colors.secondary.opacity(0.3), radius: 5, x: 0, y: 2)
     }
 }
 
@@ -50,12 +48,6 @@ struct CardStyle: ViewModifier {
             .overlay(
                 UnevenRoundedRectangle.appStyle(radius: Design.Layout.regularRadius)
                     .stroke(Design.Colors.border, lineWidth: 1)
-            )
-            .shadow(
-                color: Design.Colors.shadowColor,
-                radius: 8,
-                x: 0,
-                y: 4
             )
     }
 }

@@ -23,6 +23,18 @@ class BusInfoService: BusInfoServiceProtocol {
             authType: .bearer
         )
     }
+    
+    
+    func getBusMapUrl() throws -> URL? {
+        // Get the auth token from keychain
+        let token = keychainService.getAuthToken() ?? ""
+        guard !token.isEmpty else {
+            throw NetworkError.unauthorized
+        }
+        
+        // Construct the URL and return
+        return URL(string: ConfigurationManager.shared.currentConfig.baseURL.absoluteString + "/api/v2/businfo/map?token=\(token)&uuid=\(UUID())")
+    }
 }
 
 // MARK: - Factory Method
@@ -66,6 +78,11 @@ class MockBusInfoService: BusInfoServiceProtocol {
     /// Set a mock error response
     func setMockError(_ error: NetworkError) {
         mockBusInfoResponse = .failure(error)
+    }
+    
+    func getBusMapUrl() throws -> URL? {
+        // Construct the URL and return
+        return URL(string: "https://picsum.photos/1200/400?uuid=\(UUID())")
     }
 }
 #endif

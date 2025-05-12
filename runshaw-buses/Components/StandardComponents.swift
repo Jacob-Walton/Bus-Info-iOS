@@ -22,6 +22,17 @@ struct StandardHeader: View {
         }
     }
     
+    /// Initialize with optional actions
+    init(
+        title: String,
+        leftAction: HeaderAction? = nil,
+        rightAction: HeaderAction? = nil
+    ) {
+        self.title = title
+        self.leftAction = leftAction
+        self.rightAction = rightAction
+    }
+    
     var body: some View {
         HStack {
             if let leftAction = leftAction {
@@ -191,4 +202,19 @@ struct StandardLoadingIndicator: View {
         .clipShape(UnevenRoundedRectangle.appStyle(radius: Design.Layout.regularRadius))
         .shadow(color: showBackground ? Design.Colors.shadowColor : Color.clear, radius: 15, x: 0, y: 5)
     }
+}
+
+#Preview {
+    StandardHeader(
+        title: "Runshaw Buses",
+        leftAction: StandardHeader.HeaderAction(
+            iconName: "rectangle.portrait.and.arrow.right",
+            action: {}
+        ),
+        rightAction: StandardHeader.HeaderAction(
+            iconName: "arrow.clockwise",
+            action: {}
+        )
+    )
+    Spacer()
 }
