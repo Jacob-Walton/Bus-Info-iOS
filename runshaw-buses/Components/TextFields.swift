@@ -86,6 +86,10 @@ struct AppTextField: View {
     @Binding var text: String
     let type: TextFieldType
     
+    // New optional parameters for overriding default behavior
+    let autoCapitalization: TextInputAutocapitalization?
+    let autocorrectionDisabled: Bool?
+    
     // Focus state for this specific text field
     @FocusState private var isFocused: Bool
     
@@ -98,12 +102,16 @@ struct AppTextField: View {
         label: String,
         placeholder: String,
         text: Binding<String>,
-        type: TextFieldType = .text
+        type: TextFieldType = .text,
+        autoCapitalization: TextInputAutocapitalization? = nil,
+        autocorrectionDisabled: Bool? = nil
     ) {
         self.label = label
         self.placeholder = placeholder
         self._text = text
         self.type = type
+        self.autoCapitalization = autoCapitalization
+        self.autocorrectionDisabled = autocorrectionDisabled
     }
     
     var body: some View {
@@ -134,8 +142,10 @@ struct AppTextField: View {
                         // Apply type-specific settings
                         .keyboardType(type.keyboardType)
                         .textContentType(type.textContentType.map { UITextContentType(rawValue: $0.rawValue) })
-                        .textInputAutocapitalization(TextInputAutocapitalization(type.autocapitalization))
-                        .autocorrectionDisabled(type == .emailAddress || type == .password || type == .url)
+                        // Use override if provided, otherwise use default from type
+                        .textInputAutocapitalization(autoCapitalization ?? TextInputAutocapitalization(type.autocapitalization))
+                        // Use override if provided, otherwise determine based on type
+                        .autocorrectionDisabled(autocorrectionDisabled ?? (type == .emailAddress || type == .password || type == .url))
 
                     if !text.isEmpty {
                         Button(action: {
@@ -255,4 +265,9 @@ struct RememberMeRow: View {
             }
         }
     }
+}
+
+/// Helper function to dismiss the keyboard
+private func hideKeyboard() {
+    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
 }

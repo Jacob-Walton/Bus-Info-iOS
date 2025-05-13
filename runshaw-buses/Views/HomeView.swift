@@ -50,7 +50,7 @@ struct HomeView: View {
                     VStack(spacing: 0) {
                         SharedHeroView(
                             title: "Runshaw Buses",
-                            subtitle: "Check the latest bus arrivals",
+                            subtitle: "Check bus arrivals",
                             height: 220,
                         )
                         
@@ -82,17 +82,42 @@ struct HomeView: View {
                                             .font(.system(size: 14, weight: .medium))
                                             .foregroundStyle(Design.Colors.darkGrey)
                                     }
+                                    Spacer()
                                     
-                                    AppTextField(label: "", placeholder: "Enter bus number...", text: $busInfoViewModel.filterText)
-                                        .keyboardType(.numberPad)
-                                        .toolbar {
-                                            ToolbarItemGroup(placement: .keyboard) {
-                                                Spacer()
-                                                Button("Done") {
-                                                    hideKeyboard()
+                                    AppTextField(
+                                        label: "",
+                                        placeholder: "Enter bus number...",
+                                        text: Binding(
+                                            get: { busInfoViewModel.filterText },
+                                            set: { newValue in
+                                                // Ultra-simplified sanitization to minimize processing
+                                                var result = ""
+                                                
+                                                // Handle the input with minimal operations and explicit bounds checking
+                                                for (index, char) in newValue.uppercased().enumerated() {
+                                                    // Stop at max length
+                                                    if index >= 4 { break }
+                                                    
+                                                    // First 3 chars: digits only
+                                                    if index < 3 {
+                                                        if char.isNumber {
+                                                            result.append(char)
+                                                        }
+                                                    }
+                                                    // 4th char: "B" only
+                                                    else if index == 3 && char == "B" {
+                                                        result.append(char)
+                                                    }
                                                 }
+                                                
+                                                // Simple direct assignment
+                                                busInfoViewModel.filterText = result
                                             }
-                                        }
+                                        ),
+                                        type: .text,
+                                        autoCapitalization: .none,
+                                        autocorrectionDisabled: true
+                                    )
                                 }
                                 
                                 // Divider between search and results
@@ -161,11 +186,6 @@ struct HomeView: View {
     }
 }
 
-/// Helper function to dismiss the keyboard
-private func hideKeyboard() {
-    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-}
-
 struct CustomNavigationHeader: View {
     let busInfoViewModel: BusInfoViewModel
     let onSignOut: () -> Void
@@ -183,6 +203,11 @@ struct CustomNavigationHeader: View {
             )
         )
     }
+}
+
+/// Helper function to hide the keyboard
+fileprivate func hideKeyboard() {
+    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
 }
 
 /// Empty state view when no buses are available
@@ -248,14 +273,6 @@ struct BusListView: View {
                 }.frame(maxHeight: 400) // Max height for the scrollable list content
             }
         }
-        // Removed card-like modifiers from here, as they are now on the parent container in HomeView
-        // .padding(Design.Spacing.medium)
-        // .background(Design.Colors.background)
-        // .clipShape(UnevenRoundedRectangle.appStyle(radius: Design.Layout.regularRadius))
-        // .overlay(
-        //     UnevenRoundedRectangle.appStyle(radius: Design.Layout.regularRadius)
-        //         .stroke(Design.Colors.border, lineWidth: 1)
-        // )
     }
 }
 

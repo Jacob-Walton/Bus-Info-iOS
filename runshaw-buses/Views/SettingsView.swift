@@ -28,14 +28,27 @@ struct SettingsView: View {
     @State private var showPreferredRoutesSeparately = true // TODO: Implement persistence and logic
     @State private var preferredRoutes: [String] = ["809", "819", "821"] // TODO: Load from user preferences
     
+    // New states for improved route selection
+    @State private var routeSearchText = ""
+    @State private var showRoutesSection = false
+    
+    // Add back missing state variable
     @State private var isAddingRoute = false
-
+    
     var body: some View {
         ZStack {
             Design.Colors.lightGrey.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                StandardHeader(title: "Settings")
+                StandardHeader(title: "Settings",
+                               leftAction: StandardHeader.HeaderAction(
+                                   iconName: "rectangle.portrait.and.arrow.right",
+                                   action: { }
+                               ),
+                               rightAction: StandardHeader.HeaderAction(
+                                   iconName: "checkmark.circle",
+                                   action: { }
+                               ))
                 
                 ScrollView {
                     VStack(spacing: 0) {
@@ -90,34 +103,103 @@ struct SettingsView: View {
 
                 Divider()
 
-                // List of preferred routes
-                Text("Your Preferred Routes")
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(Design.Colors.text)
-                
-                if preferredRoutes.isEmpty {
-                    Text("No routes added yet. Tap below to add.")
-                        .font(.system(size: 14))
-                        .foregroundColor(Design.Colors.darkGrey)
-                        .padding(.vertical, Design.Spacing.tiny)
-                } else {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: Design.Spacing.small) {
-                            ForEach(preferredRoutes, id: \.self) { route in
-                                RouteChip(route: route, onRemove: { removeRoute(route) })
+                // Selected routes summary and expand button
+                VStack(spacing: 0) {
+                    Button(action: {
+                        hideKeyboard() // Hide keyboard when toggling
+                        withAnimation(.easeInOut(duration: 0.25)) {
+                            showRoutesSection.toggle()
+                            // Load routes if expanded and needed
+                            if showRoutesSection && busInfoViewModel.availableBusRoutes.isEmpty {
+                                busInfoViewModel.fetchAvailableBusRoutes()
                             }
                         }
-                        .padding(.vertical, Design.Spacing.tiny)
+                    }) {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Select Your Preferred Routes")
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundColor(Design.Colors.text)
+                                
+                                Text(preferredRoutes.isEmpty ? 
+                                     "No routes selected" : 
+                                     "\(preferredRoutes.count) routes selected")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(Design.Colors.darkGrey)
+                            }
+                            
+                            Spacer()
+                            
+                            Image(systemName: showRoutesSection ? "chevron.up" : "chevron.down")
+                                .foregroundColor(Design.Colors.darkGrey)
+                                .frame(width: 20, height: 20)
+                                .background(
+                                    Circle()
+                                        .fill(Color.clear)
+                                        .frame(width: 30, height: 30)
+                                )
+                                .rotationEffect(.degrees(showRoutesSection ? 0 : 180))
+                                .animation(.spring(response: 0.3), value: showRoutesSection)
+                        }
+                        .contentShape(Rectangle())
+                        .padding(.vertical, 10)
                     }
-                }
-
-                Button(action: { isAddingRoute = true }) {
-                    HStack {
-                        Image(systemName: "plus.circle.fill")
-                        Text("Add Preferred Route")
+                    .buttonStyle(PlainButtonStyle())
+                    
+                    // Expandable routes selection section
+                    if showRoutesSection {
+                        VStack(spacing: Design.Spacing.small) {
+                            // Search field with clear button
+                            AppTextField(
+                                label: "",
+                                placeholder: "Search routes...",
+                                text: $routeSearchText,
+                                type: .text,
+                                autoCapitalization: .never,
+                                autocorrectionDisabled: true
+                            )
+                            .padding(.top, 6)
+                            
+                            // Loading or Content
+                            Group {
+                                if busInfoViewModel.isLoadingRoutes {
+                                    HStack {
+                                        Spacer()
+                                        ProgressView()
+                                            .padding()
+                                        Spacer()
+                                    }
+                                } else {
+                                    let filteredRoutes = busInfoViewModel.availableBusRoutes
+                                        .filter { routeSearchText.isEmpty || $0.localizedCaseInsensitiveContains(routeSearchText) }
+                                        .sorted()
+                                    
+                                    if filteredRoutes.isEmpty {
+                                        VStack(spacing: Design.Spacing.small) {
+                                            if !routeSearchText.isEmpty {
+                                                Text("No matching routes found")
+                                                    .font(.system(size: 14))
+                                                    .foregroundColor(Design.Colors.darkGrey)
+                                                    .frame(maxWidth: .infinity, alignment: .center)
+                                                    .padding()
+                                            } else if busInfoViewModel.availableBusRoutes.isEmpty {
+                                                Text("No bus routes available")
+                                                    .font(.system(size: 14))
+                                                    .foregroundColor(Design.Colors.darkGrey)
+                                                    .frame(maxWidth: .infinity, alignment: .center)
+                                                    .padding()
+                                            }
+                                        }
+                                        .frame(height: 100)
+                                    } else {
+                                        routeListView(routes: filteredRoutes)
+                                    }
+                                }
+                            }
+                        }
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                        .padding(.top, Design.Spacing.small)
                     }
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(Design.Colors.primary)
                 }
             }
             .padding(Design.Spacing.medium)
@@ -127,7 +209,78 @@ struct SettingsView: View {
                 UnevenRoundedRectangle.appStyle(radius: Design.Layout.regularRadius)
                     .stroke(Design.Colors.border, lineWidth: 1)
             )
+            .animation(.easeInOut(duration: 0.25), value: showRoutesSection)
         }
+    }
+    
+    // Optimized route list view with ScrollView instead of List
+    private func routeListView(routes: [String]) -> some View {
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(spacing: 0) {
+                    ForEach(routes, id: \.self) { route in
+                        routeToggleRow(route: route)
+                        
+                        if route != routes.last {
+                            Divider()
+                                .padding(.leading, Design.Spacing.medium)
+                        }
+                    }
+                }
+            }
+            .frame(height: min(300, CGFloat(routes.count * 44)))
+        }
+        .background(Design.Colors.background)
+        .clipShape(UnevenRoundedRectangle.appStyle(radius: Design.Layout.buttonRadius))
+        .overlay(
+            UnevenRoundedRectangle.appStyle(radius: Design.Layout.buttonRadius)
+                .stroke(Design.Colors.border, lineWidth: 0.5)
+        )
+    }
+    
+    // Helper view for route toggle row
+    private func routeToggleRow(route: String) -> some View {
+        let isSelected = preferredRoutes.contains(route)
+        
+        return Button(action: {
+            // Use haptic feedback for selection
+            let generator = UIImpactFeedbackGenerator(style: .light)
+            generator.prepare()
+            
+            withAnimation(.easeInOut(duration: 0.2)) {
+                toggleRoute(route)
+                generator.impactOccurred()
+            }
+        }) {
+            HStack {
+                Text("Bus \(route)")
+                    .font(.system(size: 16))
+                    .foregroundColor(Design.Colors.text)
+                
+                Spacer()
+                
+                ZStack {
+                    Circle()
+                        .stroke(isSelected ? Design.Colors.primary : Design.Colors.darkGrey.opacity(0.3), lineWidth: 1.5)
+                        .frame(width: 22, height: 22)
+                    
+                    if isSelected {
+                        Circle()
+                            .fill(Design.Colors.primary)
+                            .frame(width: 14, height: 14)
+                            .transition(.scale.combined(with: .opacity))
+                    }
+                }
+            }
+            .contentShape(Rectangle())
+            .padding(.vertical, 12)
+            .padding(.horizontal, Design.Spacing.medium)
+            .background(
+                UnevenRoundedRectangle.appStyle(radius: Design.Layout.buttonRadius)
+                    .fill(isSelected ? Design.Colors.primary.opacity(0.1) : Color.clear)
+            )
+        }
+        .buttonStyle(PlainButtonStyle())
     }
 
     private var notificationsSection: some View {
@@ -340,47 +493,33 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - Helper Methods
+    // Add back the addRoute function (now uses toggleRoute)
     private func addRoute(_ route: String) {
         if !preferredRoutes.contains(route) {
-            preferredRoutes.append(route)
-            preferredRoutes.sort { (Int($0.filter { $0.isNumber }) ?? 0) < (Int($1.filter { $0.isNumber }) ?? 0) }
-            // TODO: Save preferredRoutes to UserDefaults or backend
+            toggleRoute(route)
         }
     }
 
-    private func removeRoute(_ route: String) {
-        preferredRoutes.removeAll { $0 == route }
+    // Updated toggle method that handles both adding and removing
+    private func toggleRoute(_ route: String) {
+        if preferredRoutes.contains(route) {
+            preferredRoutes.removeAll { $0 == route }
+        } else {
+            preferredRoutes.append(route)
+            preferredRoutes.sort()
+        }
         // TODO: Save preferredRoutes to UserDefaults or backend
     }
 
+    // MARK: - Helper Methods
     private func getAppVersion() -> String {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
         let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
         return "v\(version) (Build \(build))"
     }
-}
-
-/// UI Component for displaying a route with a delete option
-struct RouteChip: View {
-    let route: String
-    let onRemove: () -> Void
     
-    var body: some View {
-        HStack(spacing: Design.Spacing.tiny) {
-            Text(route)
-                .font(.system(size: 14, weight: .medium))
-                .foregroundColor(Design.Colors.background)
-            
-            Button(action: onRemove) {
-                Image(systemName: "xmark.circle.fill")
-                    .font(.system(size: 16))
-                    .foregroundColor(Design.Colors.background.opacity(0.7))
-            }
-        }
-        .padding(.horizontal, Design.Spacing.small)
-        .padding(.vertical, Design.Spacing.tiny + 2)
-        .background(Design.Colors.primary)
-        .clipShape(Capsule())
+    // Add helper function to hide keyboard
+    private func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }

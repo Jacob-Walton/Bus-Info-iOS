@@ -19,7 +19,15 @@ struct RankingsView: View {
             
             VStack(spacing: 0) {
                 // Standard header component for UI consistency
-                StandardHeader(title: "Bus Rankings")
+                StandardHeader(title: "Bus Rankings",
+                               leftAction: StandardHeader.HeaderAction(
+                                   iconName: "rectangle.portrait.and.arrow.right",
+                                   action: { }
+                               ),
+                               rightAction: StandardHeader.HeaderAction(
+                                   iconName: "arrow.clockwise",
+                                   action: { }
+                               ))
                 
                 // Content area
                 ScrollView {
@@ -28,7 +36,7 @@ struct RankingsView: View {
                         SharedHeroView(
                             title: "Bus Rankings",
                             subtitle: "Leaderboard coming soon",
-                            height: 180
+                            height: 220
                         )
                         
                         // Coming soon content

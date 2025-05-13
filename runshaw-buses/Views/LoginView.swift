@@ -53,7 +53,7 @@ struct LoginView: View {
                                 label: "Email",
                                 placeholder: "Enter your email",
                                 text: $username,
-                                type: .emailAddress
+                                type: .emailAddress,
                             )
                             
                             AppTextField(
