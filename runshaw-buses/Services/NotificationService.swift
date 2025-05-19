@@ -231,6 +231,20 @@ class NotificationService: NSObject, NotificationServiceProtocol, ObservableObje
         }
     }
     
+    /// Clear all badge notifications without marking notifications as read
+    /// This is used when the app becomes active to reset the badge count
+    func clearBadges() {
+        DispatchQueue.main.async {
+            UNUserNotificationCenter.current().setBadgeCount(0) { error in
+                if let error = error {
+                    print("Failed to clear badge count: \(error)")
+                } else {
+                    print("Successfully cleared badge count")
+                }
+            }
+        }
+    }
+    
     /// Update the app badge count
     private func updateBadgeCount() {
         UNUserNotificationCenter.current().setBadgeCount(unreadCount) { error in
@@ -304,6 +318,7 @@ extension NotificationService {
 // MARK: - Mock Notification Service for Testing
 
 #if DEBUG
+// TODO: Implement the mock service properly
 class MockNotificationService: NSObject, NotificationServiceProtocol, ObservableObject {
     // MARK: - Published Properties
     @Published var notifications: [PushNotification] = []
@@ -407,6 +422,11 @@ class MockNotificationService: NSObject, NotificationServiceProtocol, Observable
     
     func updateSettings(_ newSettings: NotificationSettings) {
         settings = newSettings
+    }
+    
+    /// Clear all badge notifications without marking notifications as read
+    func clearBadges() {
+        print("[MOCK] Cleared badge count")
     }
     
     // MARK: - UNUserNotificationCenterDelegate stubs

@@ -65,6 +65,7 @@ extension WebAuthenticationService {
 // MARK: - Mock Web Authentication Service
 
 #if DEBUG
+// TODO: Implement the mock service properly
 class MockWebAuthenticationService: WebAuthenticationServiceProtocol {
     /// The mock result to be returned
     var mockResult: Result<URL, Error>?

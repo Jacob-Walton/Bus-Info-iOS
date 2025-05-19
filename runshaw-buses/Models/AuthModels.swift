@@ -35,3 +35,22 @@ struct UserPreferences: Codable {
     let showPreferredRoutesSeparately: Bool
     let preferredRoutes: [String]
 }
+
+enum AuthState: Equatable {
+    case loading
+    case signedIn(User)
+    case signedOut
+
+    static func == (lhs: AuthState, rhs: AuthState) -> Bool {
+        switch (lhs, rhs) {
+        case (.loading, .loading):
+            return true
+        case (.signedIn(let user1), .signedIn(let user2)):
+            return user1 == user2
+        case (.signedOut, .signedOut):
+            return true
+        default:
+            return false
+        }
+    }
+}

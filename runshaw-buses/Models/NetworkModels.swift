@@ -11,7 +11,6 @@ enum HTTPMethod: String {
 
 enum AuthType {
     case bearer // JWT token
-    case apiKey // For future use (if any)
     case none   // No authentication
 }
 

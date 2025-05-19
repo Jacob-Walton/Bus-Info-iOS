@@ -32,6 +32,22 @@ class AuthService: AuthServiceProtocol {
     func logout() -> AnyPublisher<EmptyResponse, NetworkError> {
         return networkService.request(endpoint: "api/accounts/logout", method: .post)
     }
+
+    func isAccountPendingDeletion(email: String) -> AnyPublisher<Bool, NetworkError> {
+        // let request = ReactivateAccountRequest(email: email)
+        // guard let data = try? JSONEncoder().encode(request) else {
+        //     return Fail(error: NetworkError.unexpectedError(NSError(domain: "AuthService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to encode request"]))).eraseToAnyPublisher()
+        // }
+        
+        // return networkService.request(endpoint: "api/accounts/pending-deletion", method: .post, body: data)
+        //     .map { $0.isPendingDeletion }
+        //     .eraseToAnyPublisher()
+
+        // Temporary implementation until the API supports this feature
+        return Just(false)
+            .setFailureType(to: NetworkError.self)
+            .eraseToAnyPublisher()
+    }
     
     func reactivateAccount(email: String) -> AnyPublisher<EmptyResponse, NetworkError> {
         let request = ReactivateAccountRequest(email: email)
@@ -87,10 +103,12 @@ extension AuthService {
 // MARK: - Mock Auth Service
 
 #if DEBUG
+// TODO: Implement the mock service
 class MockAuthService: AuthServiceProtocol {
     var mockLoginResponse: Result<LoginResponse, NetworkError> = .failure(.unexpectedError(NSError()))
     var mockRefreshResponse: Result<LoginResponse, NetworkError> = .failure(.unexpectedError(NSError()))
     var mockLogoutResponse: Result<EmptyResponse, NetworkError> = .failure(.unexpectedError(NSError()))
+    var mockIsAccountPendingDeletionResponse: Result<Bool, NetworkError> = .failure(.unexpectedError(NSError()))
     var mockReactivateResponse: Result<EmptyResponse, NetworkError> = .failure(.unexpectedError(NSError()))
     var mockGoogleTokenResponse: Result<LoginResponse, NetworkError> = .failure(.unexpectedError(NSError()))
     var mockAppleTokenResponse: Result<LoginResponse, NetworkError> = .failure(.unexpectedError(NSError()))
@@ -107,6 +125,10 @@ class MockAuthService: AuthServiceProtocol {
     
     func logout() -> AnyPublisher<EmptyResponse, NetworkError> {
         return mockLogoutResponse.publisher.eraseToAnyPublisher()
+    }
+
+    func isAccountPendingDeletion(email: String) -> AnyPublisher<Bool, NetworkError> {
+        return mockIsAccountPendingDeletionResponse.publisher.eraseToAnyPublisher()
     }
     
     func reactivateAccount(email: String) -> AnyPublisher<EmptyResponse, NetworkError> {

@@ -111,4 +111,10 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         print("Failed to register for remote notifications: \(error.localizedDescription)")
     }
+    
+    /// Called when the app becomes active (after launch or returning from background)
+    func applicationDidBecomeActive(_ application: UIApplication) {
+        // Clear all badge notifications when the app becomes active
+        (NotificationService.shared as? NotificationService)?.clearBadges()
+    }
 }

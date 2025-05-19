@@ -17,7 +17,7 @@ struct ContentView: View {
         Group {
             switch authViewModel.authState {
             case .signedIn:
-                MainTabView()  // Use our new TabView navigation instead of directly showing HomeView
+                MainTabView()
                     .transition(.opacity)
                     .id("main-\(authViewModel.currentUser?.id ?? "unknown")")  // Force view refresh when user changes
             case .signedOut:

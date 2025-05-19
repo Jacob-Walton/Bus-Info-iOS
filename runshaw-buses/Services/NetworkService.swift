@@ -189,6 +189,7 @@ extension NetworkService {
 // MARK: - Mock Network Service
 
 #if DEBUG
+// TODO: Implement the mock service properly
 class MockNetworkService: NetworkServiceProtocol {
     /// Map of endpoint to mock response
     var mockResponses: [String: Result<Data, NetworkError>] = [:]
