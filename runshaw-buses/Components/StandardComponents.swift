@@ -204,17 +204,23 @@ struct StandardLoadingIndicator: View {
     }
 }
 
-#Preview {
-    StandardHeader(
-        title: "Runshaw Buses",
-        leftAction: StandardHeader.HeaderAction(
-            iconName: "rectangle.portrait.and.arrow.right",
-            action: {}
-        ),
-        rightAction: StandardHeader.HeaderAction(
-            iconName: "arrow.clockwise",
-            action: {}
+#if DEBUG
+/// Preview provider for StandardHeader
+struct StandardHeader_Previews: PreviewProvider {
+    static var previews: some View {
+        StandardHeader(
+            title: "Runshaw Buses",
+            leftAction: StandardHeader.HeaderAction(
+                iconName: "rectangle.portrait.and.arrow.right",
+                action: {}
+            ),
+            rightAction: StandardHeader.HeaderAction(
+                iconName: "arrow.clockwise",
+                action: {}
+            )
         )
-    )
-    Spacer()
+        .previewLayout(.sizeThatFits)
+        .padding()
+    }
 }
+#endif

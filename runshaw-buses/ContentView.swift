@@ -12,14 +12,14 @@ import SwiftUI
 struct ContentView: View {
     /// Authentication view model providing current auth state
     @EnvironmentObject var authViewModel: AuthViewModel
-    
+
     var body: some View {
         Group {
             switch authViewModel.authState {
             case .signedIn:
-                MainTabView() // Use our new TabView navigation instead of directly showing HomeView
+                MainTabView()  // Use our new TabView navigation instead of directly showing HomeView
                     .transition(.opacity)
-                    .id("main-\(authViewModel.currentUser?.id ?? "unknown")") // Force view refresh when user changes
+                    .id("main-\(authViewModel.currentUser?.id ?? "unknown")")  // Force view refresh when user changes
             case .signedOut:
                 LoginView()
                     .transition(.opacity)
@@ -29,14 +29,14 @@ struct ContentView: View {
         }
         .animation(.easeInOut, value: authViewModel.authState)
     }
-    
+
     /// Loading indicator view displayed during authentication state transitions
     private var loadingView: some View {
         VStack(spacing: Design.Spacing.medium) {
             ProgressView()
                 .progressViewStyle(CircularProgressViewStyle())
                 .scaleEffect(1.5)
-            
+
             Text("Loading...")
                 .foregroundStyle(Design.Colors.darkGrey)
                 .font(.system(size: Design.Typography.bodySize))
@@ -44,12 +44,17 @@ struct ContentView: View {
     }
 }
 
-/// Preview provider for ContentView
-#Preview {
-    let networkService = NetworkService(baseURL: ConfigurationManager.shared.currentConfig.baseURL)
-    let authService = AuthService(networkService: networkService)
-    let authViewModel = AuthViewModel(authService: authService)
-    
-    return ContentView()
-        .environmentObject(authViewModel)
-}
+#if DEBUG
+    /// Preview provider for ContentView
+    struct ContentView_Previews: PreviewProvider {
+        static var previews: some View {
+            let networkService = NetworkService(
+                baseURL: ConfigurationManager.shared.currentConfig.baseURL)
+            let authService = AuthService(networkService: networkService)
+            let authViewModel = AuthViewModel(authService: authService)
+
+            return ContentView()
+                .environmentObject(authViewModel)
+        }
+    }
+#endif

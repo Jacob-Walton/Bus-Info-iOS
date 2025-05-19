@@ -10,3 +10,4 @@ This is the iOS companion app for my [Bus Info](https://github.com/Jacob-Walton/
 - The uptime for my backend server is not guaranteed to be 100%. If the server is down, the app will not work.
 - This app is currently not available on the App Store. A testflight version will be coming soon, but for now you will need to build the app yourself.
 - The app is currently only available for iOS 17.6 and above.
+- This project contains a Package.swift for development in IDEs other than XCode, this will not successfully build the project but aims to provide a better LSP experience.

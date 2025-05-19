@@ -97,7 +97,15 @@ struct CustomTabViewContainer<Content: View>: View {
     }
 }
 
-#Preview {
+#if DEBUG
+/// Preview provider for CustomTabViewContainer
+struct CustomTabViewContainer_Previews: PreviewProvider {
+    static var previews: some View {
+        TabBarPreview()
+            .previewLayout(.sizeThatFits)
+            .padding()
+    }
+
     struct TabBarPreview: View {
         @State private var selectedTab = 0
         
@@ -122,6 +130,5 @@ struct CustomTabViewContainer<Content: View>: View {
             }
         }
     }
-    
-    return TabBarPreview()
 }
+#endif

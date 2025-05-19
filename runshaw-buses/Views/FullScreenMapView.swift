@@ -12,23 +12,23 @@ import SwiftUI
 struct FullScreenMapView: View {
     /// URL of the map image to display
     let mapUrl: URL
-    
+
     /// Binding to control visibility of the full-screen view
     @Binding var isPresented: Bool
-    
+
     // State variables for interactive gestures
     /// Current scale factor for zooming
     @State private var scale: CGFloat = 1.0
-    
+
     /// Last scale factor for tracking gesture changes
     @State private var lastScale: CGFloat = 1.0
-    
+
     /// Current offset for panning
     @State private var offset: CGSize = .zero
-    
+
     /// Last offset for tracking gesture changes
     @State private var lastOffset: CGSize = .zero
-    
+
     /// Resets zoom and position to default state
     private func resetView() {
         scale = 1.0
@@ -36,13 +36,13 @@ struct FullScreenMapView: View {
         offset = .zero
         lastOffset = .zero
     }
-    
+
     var body: some View {
         ZStack {
             // Black background for better visibility
             Color.black
                 .ignoresSafeArea()
-            
+
             // Map content with zoom and pan gestures
             AsyncImage(url: mapUrl) { phase in
                 switch phase {
@@ -61,7 +61,7 @@ struct FullScreenMapView: View {
                                 .onChanged { value in
                                     let delta = value / lastScale
                                     lastScale = value
-                                    
+
                                     // Limit zoom range between 0.5x and 5x
                                     let newScale = scale * delta
                                     scale = min(max(0.5, newScale), 5.0)
@@ -78,7 +78,7 @@ struct FullScreenMapView: View {
                                         width: lastOffset.width + value.translation.width,
                                         height: lastOffset.height + value.translation.height
                                     )
-                                    
+
                                     // Only allow panning when zoomed in
                                     if scale > 1.0 {
                                         offset = newOffset
@@ -106,7 +106,7 @@ struct FullScreenMapView: View {
                     EmptyView()
                 }
             }
-            
+
             // Custom header bar
             VStack {
                 // Custom header with close and reset buttons
@@ -121,15 +121,15 @@ struct FullScreenMapView: View {
                             .background(Color.black.opacity(0.6))
                             .clipShape(Circle())
                     }
-                    
+
                     Spacer()
-                    
+
                     Text("Bus Lane Map")
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundColor(.white)
-                    
+
                     Spacer()
-                    
+
                     Button(action: {
                         withAnimation {
                             resetView()
@@ -145,9 +145,9 @@ struct FullScreenMapView: View {
                 }
                 .padding()
                 .background(Color.black.opacity(0.2))
-                
+
                 Spacer()
-                
+
                 // Zoom instructions
                 Text("Double tap to reset zoom")
                     .font(.system(size: 14))
@@ -158,14 +158,18 @@ struct FullScreenMapView: View {
                     .padding(.bottom)
             }
         }
-        .preferredColorScheme(.dark) // Force dark mode for better viewing
+        .preferredColorScheme(.dark)  // Force dark mode for better viewing
     }
 }
 
-/// Preview provider for FullScreenMapView
-#Preview {
-    // Sample URL for preview purposes
-    let sampleUrl = URL(string: "https://picsum.photos/200/300")!
-    
-    return FullScreenMapView(mapUrl: sampleUrl, isPresented: .constant(true))
-}
+#if DEBUG
+    /// Preview provider for FullScreenMapView
+    struct FullScreenMapView_Previews: PreviewProvider {
+        static var previews: some View {
+            // Sample URL for preview purposes
+            let sampleUrl = URL(string: "https://picsum.photos/200/300")!
+
+            return FullScreenMapView(mapUrl: sampleUrl, isPresented: .constant(true))
+        }
+    }
+#endif

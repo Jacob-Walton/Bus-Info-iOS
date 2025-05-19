@@ -153,13 +153,19 @@ struct HeroWave: Shape {
     }
 }
 
+#if DEBUG
 /// Preview for SharedHeroView
-#Preview {
-    VStack {
+struct SharedHeroView_Previews: PreviewProvider {
+    static var previews: some View {
         SharedHeroView(
             title: "Welcome Back",
             subtitle: "Check the latest bus arrivals",
+            height: 220,
+            animateGradient: true,
+            contentBottomPadding: 32
         )
-        Spacer()
+        .previewLayout(.sizeThatFits)
+        .padding()
     }
 }
+#endif

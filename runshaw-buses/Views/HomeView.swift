@@ -462,7 +462,6 @@ struct LoadingOverlay: View {
 struct HomeView_Previews: PreviewProvider {
     static var previews: some View {
         // Setup mock services
-        let mockNetworkService = MockNetworkService()
         let mockKeychainService = MockKeychainService()
         let mockAuthService = MockAuthService()
         let mockBusInfoService = MockBusInfoService()
