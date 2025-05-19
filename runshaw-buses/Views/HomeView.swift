@@ -262,7 +262,7 @@ struct BusListView: View {
                             busNumber: busNumber,
                             isArrived: busInfoViewModel.isBusArrived(busNumber: busNumber),
                             bay: busInfoViewModel.getBayForBus(busNumber: busNumber),
-                            status: busInfoViewModel.getStatusForBus(busNumber: busNumber)
+                            status: busInfoViewModel.getStatusText(busNumber: busNumber)
                         )
                         
                         // Divider logic also uses the filtered list

@@ -25,6 +25,9 @@ struct ContentView: View {
                     .transition(.opacity)
             case .loading:
                 loadingView
+            case .serverUnreachable:
+                ConnectivityErrorView()
+                    .transition(.opacity)
             }
         }
         .animation(.easeInOut, value: authViewModel.authState)

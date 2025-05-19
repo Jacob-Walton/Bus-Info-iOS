@@ -25,7 +25,9 @@ struct BusInfoResponse: Codable {
         lastUpdated = try container.decodeIfPresent(String.self, forKey: .lastUpdated)
         status = try container.decode(String.self, forKey: .status)
         
+        #if DEBUG
         print("Successfully decoded \(busData.count) bus entries")
+        #endif
     }
 }
 

@@ -171,14 +171,22 @@ class AuthViewModel: ObservableObject {
         authService.validateToken()
             .receive(on: DispatchQueue.main)
             .sink { completion in
-                if case .failure(_) = completion {
-                    // Network error or server unreachable - use cached user
-                    #if DEBUG
-                        print("Failed to validate token with server. Using cached user.")
-                    #endif
-
-                    self.updateAuthState(.signedIn(fallbackUser))
-                    self.scheduleTokenRefresh(expirationDate: fallbackExpiration)
+                if case .failure(let error) = completion {
+                    // Check specifically for connectivity errors
+                    if case .connectivityError = error {
+                        // Network connectivity issue - don't log out, show connectivity error
+                        #if DEBUG
+                            print("Network connectivity issue detected. Showing server unreachable state.")
+                        #endif
+                        self.updateAuthState(.serverUnreachable)
+                    } else {
+                        // Other errors - use cached user data if available
+                        #if DEBUG
+                            print("Failed to validate token with server. Using cached user.")
+                        #endif
+                        self.updateAuthState(.signedIn(fallbackUser))
+                        self.scheduleTokenRefresh(expirationDate: fallbackExpiration)
+                    }
                 }
             } receiveValue: { response in
                 if response.isValid {
@@ -258,7 +266,7 @@ class AuthViewModel: ObservableObject {
         self.isAuthenticating = true
 
         authService.logout()
-            .receive(on: DIspatchQueue.main)
+            .receive(on: DispatchQueue.main)
             .sink { completion in
                 self.isAuthenticating = false
 
@@ -279,6 +287,7 @@ class AuthViewModel: ObservableObject {
     /// - Returns: A boolean indicating if the account is pending deletion
     func isAccountPendingDeletion(email: String) -> Bool {
         self.isAuthenticating = true
+        var isPendingDeletion: Bool = false
 
         authService.isAccountPendingDeletion(email: email)
             .receive(on: DispatchQueue.main)
@@ -293,16 +302,12 @@ class AuthViewModel: ObservableObject {
                 if response {
                     self.errorMessage = "Your account is pending deletion. Please contact support."
                     self.showError = true
-
-                    return true
-                } else {
-                    // Account is not pending deletion
-                    return false
+                    isPendingDeletion = true
                 }
             }
             .store(in: &cancellables)
 
-        return false
+        return isPendingDeletion
     }
 
     /// Reactivate account
@@ -375,7 +380,7 @@ class AuthViewModel: ObservableObject {
                     }
                 },
                 receiveValue: { [weak self] response in
-                    guard let self = self else { retunr }
+                    guard let self = self else { return }
 
                     // Store auth data
                     guard self.keychainService.saveAuthToken(response.token) else {
@@ -417,7 +422,6 @@ class AuthViewModel: ObservableObject {
 
                     // Update auth state
                     self.updateAuthState(.signedIn(response.user))
-                    self.scheduleTokenRefresh(expirationDate: response.expiresAt)
                 }
             )
             .store(in: &cancellables)
@@ -507,7 +511,6 @@ class AuthViewModel: ObservableObject {
 
                     // Update auth state
                     self.updateAuthState(.signedIn(response.user))
-                    self.scheduleTokenRefresh(expirationDate: response.expiresAt)
                 }
             )
             .store(in: &cancellables)
@@ -546,10 +549,16 @@ class AuthViewModel: ObservableObject {
                     #if DEBUG
                         print("Failed to refresh token: \(error.localizedDescription)")
                     #endif
-
-                    // Clear all tokens and update auth state
-                    self.keychainService.clearAllTokens()
-                    self.updateAuthState(.signedOut)
+                    
+                    // Check if the failure is due to connectivity issues
+                    if case .connectivityError = error {
+                        // Network connectivity issue - don't log out
+                        self.updateAuthState(.serverUnreachable)
+                    } else {
+                        // Other errors - clear tokens and update auth state
+                        self.keychainService.clearAllTokens()
+                        self.updateAuthState(.signedOut)
+                    }
                 }
             } receiveValue: { response in
                 // Store new auth data
@@ -611,15 +620,37 @@ class AuthViewModel: ObservableObject {
             self.refreshAuthToken(refreshToken: refreshToken)
         }
     }
-}
-
-// MARK: - Factory Method
-extension AuthViewModel {
-    /// Factory method to create an instance of AuthViewModel
-    /// - Returns: An instance of AuthViewModel
-    static func create() -> AuthViewModel {
-        let authService = AuthService.create()
-        let keychainService = KeychainService.shared
-        return AuthViewModel(authService: authService, keychainService: keychainService)
+    
+    /// Helper to show errors easily
+    /// - Parameters:
+    ///     - message: The error message
+    func showError(message: String) {
+        DispatchQueue.main.async {
+            self.errorMessage = message
+            self.showError = true
+        }
+    }
+    
+    /// Retry connection to the server
+    func retryConnection() {
+        // Set loading state first
+        self.authState = .loading
+        
+        // Delay to show the loading state
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            // Check for existing authentication state
+            if let user = self.keychainService.getCurrentUser(),
+               let expiration = self.keychainService.getTokenExpiration(),
+               Date() < expiration {
+                // Valid token found, validate with server
+                self.validateToken(fallbackUser: user, fallbackExpiration: expiration)
+            } else if let refreshToken = self.keychainService.getRefreshToken() {
+                // Token expired, try to refresh
+                self.refreshAuthToken(refreshToken: refreshToken)
+            } else {
+                // No valid token or refresh token, set to logged out
+                self.updateAuthState(.signedOut)
+            }
+        }
     }
 }

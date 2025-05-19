@@ -8,11 +8,12 @@ class BusInfoViewModel: ObservableObject {
     @Published var lastUpdated: String?
     @Published var isLoading: Bool = false
     @Published var error: String?
+    @Published var sortedBusKeys: [String] = []  // Sorted bus keys for display
     @Published var mapUrl: URL?
     @Published var filterText: String = ""  // For filtering bus data
 
     /// Bus routes for picker (abstract this to the SettingsView later)
-    @Published var availableBusRotues: [String] = []
+    @Published var availableBusRoutes: [String] = []
     @Published var isLoadingRoutes: Bool = false
     @Published var routesError: String?
 
@@ -70,7 +71,7 @@ class BusInfoViewModel: ObservableObject {
     /// Fetch latest bus map URL (with token query parameter)
     func updateBusMap() {
         do {
-            try mapUrl = busInfoService.getMapUrl()
+            try mapUrl = busInfoService.getBusMapUrl()
         } catch NetworkError.unauthorized {
             print("Failed to fetch map URL: Unauthorized")
         } catch {
@@ -87,10 +88,9 @@ class BusInfoViewModel: ObservableObject {
             print("Fetching bus info...")
         #endif
 
-        busInfoService.fetchBusInfo()
+        busInfoService.getBusInfo()
             .receive(on: DispatchQueue.main)
-            .sink(
-                receiveCompletion: { [weak self] completion in
+            .sink { [weak self] completion in
                     guard let self = self else { return }
                     self.isLoading = false
 
@@ -112,8 +112,7 @@ class BusInfoViewModel: ObservableObject {
                             self.error = "Failed to load bus information. Please try again later."
                         }
                     }
-                },
-                receiveValue: { [weak self] response in
+                } receiveValue: { [weak self] response in
                     guard let self = self else { return }
 
                     #if DEBUG
@@ -157,7 +156,6 @@ class BusInfoViewModel: ObservableObject {
                         self.objectWillChange.send()
                     }
                 }
-            )
             .store(in: &cancellables)
     }
 
@@ -165,10 +163,10 @@ class BusInfoViewModel: ObservableObject {
     private func updateFilteredBusKeys() {
         if filterText.isEmpty {
             // If no filter, show all sorted bus keys
-            filteredBusKeys = allSortedBusKeys
+            sortedBusKeys = allSortedBusKeys
         } else {
             // Filter the bus keys based on the filter text
-            filteredBusKeys = allSortedBusKeys.filter {
+            sortedBusKeys = allSortedBusKeys.filter {
                 $0.localizedCaseInsensitiveContains(filterText)
             }
         }
@@ -277,7 +275,7 @@ class BusInfoViewModel: ObservableObject {
     /// Get status text for a bus
     /// - Parameter busNumber: The bus number to check
     /// - Returns: The status text for the bus, or "Unknown" if not found
-    func getStatusText(busNumber: String) -> String? {
+    func getStatusText(busNumber: String) -> String {
         guard let bus = busData[busNumber] else {
             #if DEBUG
                 print("Bus \(busNumber) not found.")
@@ -337,7 +335,7 @@ class BusInfoViewModel: ObservableObject {
                         print("Setting available bus routes to \(sorted.count) entries.")
                     #endif
 
-                    self.availableBusRotues = sorted
+                    self.availableBusRoutes = sorted
                 }
             )
             .store(in: &cancellables)
