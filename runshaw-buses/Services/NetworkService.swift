@@ -94,13 +94,6 @@ class NetworkService: NetworkServiceProtocol {
                 #if DEBUG
                 print("Using Bearer token for authentication: \(token.prefix(8))...")
                 #endif
-
-                case .apiKey:
-                // Placeholder for future API key authentication
-                request.addValue(token, forHTTPHeaderField: "X-API-Key")
-                #if DEBUG
-                print("Using API key for authentication: \(token.prefix(8))...")
-                #endif
                 
                 case .none:
                 // No authentication required
@@ -164,7 +157,17 @@ class NetworkService: NetworkServiceProtocol {
             } else if let networkError = error as? NetworkError {
                 return networkError
             } else if let urlError = error as? URLError {
-                return NetworkError.unexpectedError(urlError)
+                // Identify connectivity-specific errors
+                switch urlError.code {
+                case .notConnectedToInternet, .networkConnectionLost, .cannotConnectToHost,
+                     .cannotFindHost, .timedOut, .dnsLookupFailed:
+                    #if DEBUG
+                    print("Network connectivity error: \(urlError.localizedDescription)")
+                    #endif
+                    return NetworkError.connectivityError(urlError)
+                default:
+                    return NetworkError.unexpectedError(urlError)
+                }
             } else {
                 return NetworkError.unexpectedError(error)
             }
@@ -189,6 +192,7 @@ extension NetworkService {
 // MARK: - Mock Network Service
 
 #if DEBUG
+// TODO: Implement the mock service properly
 class MockNetworkService: NetworkServiceProtocol {
     /// Map of endpoint to mock response
     var mockResponses: [String: Result<Data, NetworkError>] = [:]

@@ -104,6 +104,8 @@ struct Design {
         static let buttonRadius = 9.0
         /// Border radius for cards and larger components (19px)
         static let regularRadius = 19.0
+        /// Border radius for text fields (6px)
+        static let textFieldRadius = 6.0
         
         /// Shadow configuration for dropdown menus
         static let dropdownShadow = Shadow(

@@ -9,7 +9,11 @@ protocol AuthServiceProtocol {
     /// Logout current user
     func logout() -> AnyPublisher<EmptyResponse, NetworkError>
 
-    /// Reactive a deactivated account
+    /// Check if an account is marked as deactivated
+    /// Note: Will always return false as the API does not support this feature yet.
+    func isAccountPendingDeletion(email: String) -> AnyPublisher<Bool, NetworkError>
+
+    /// Reactivate a deactivated account
     func reactivateAccount(email: String) -> AnyPublisher<EmptyResponse, NetworkError>
 
     /// Exchange Google token for authentication
@@ -23,4 +27,7 @@ protocol AuthServiceProtocol {
 
     /// Get current user's profile
     func getUserProfile() -> AnyPublisher<User, NetworkError>
+    
+    /// Get current user's preferences
+    func getUserPreferences() -> AnyPublisher<UserPreferences, NetworkError>
 }

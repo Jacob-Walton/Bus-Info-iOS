@@ -1,11 +1,3 @@
-//
-//  LoginComponents.swift
-//  runshaw-buses
-//
-//  Created by Jacob on 03/05/2025.
-//  Copyright © 2025 Konpeki. All rights reserved.
-//
-
 import SwiftUI
 
 /// Displays the app logo with styling
@@ -32,9 +24,16 @@ struct WelcomeHeader: View {
 
 /// Button for creating a new account
 struct CreateAccountButton: View {
+    /// Action to perform when button is tapped
+    let action: () -> Void
+    
+    init(action: @escaping () -> Void = {}) {
+        self.action = action
+    }
+    
     var body: some View {
         IconTextButton(iconName: "person.badge.plus", label: "Create new account") {
-            // Navigation to register screen will be implemented here
+            action()
         }
         .padding(.top, Design.Spacing.medium)
     }

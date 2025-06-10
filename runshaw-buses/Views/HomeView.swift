@@ -13,11 +13,11 @@ struct HomeView: View {
     /// Authentication view model for managing user session
     @EnvironmentObject var authViewModel: AuthViewModel
     
-    /// Notification service for managing push notifications
-    @EnvironmentObject var notificationService: NotificationService
-    
     /// View model for bus information and status
     @StateObject private var busInfoViewModel: BusInfoViewModel
+    
+    /// Image ID for force reloading
+    @State var imageId: UUID = UUID()
     
     /// Initialize with dependencies
     init(busInfoViewModel: BusInfoViewModel? = nil) {
@@ -35,7 +35,6 @@ struct HomeView: View {
             Design.Colors.lightGrey.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Custom navigation header instead of NavigationStack
                 CustomNavigationHeader(
                     busInfoViewModel: busInfoViewModel,
                     onSignOut: {
@@ -43,11 +42,14 @@ struct HomeView: View {
                     }
                 )
                 
-                // Main content with pull-to-refresh
+                // Main content
                 ScrollView {
                     VStack(spacing: 0) {
-                        // Hero banner section
-                        HeroView()
+                        SharedHeroView(
+                            title: "Runshaw Buses",
+                            subtitle: "Check bus arrivals",
+                            height: 220,
+                        )
                         
                         // Error message display
                         if let error = busInfoViewModel.error {
@@ -58,19 +60,81 @@ struct HomeView: View {
                         
                         // Main content sections
                         VStack(spacing: Design.Spacing.large) {
-                            // Bus status section
-                            VStack(alignment: .leading, spacing: Design.Spacing.small) {
-                                Text("Bus Status")
-                                    .font(.system(size: Design.Typography.heading5Size, weight: .semibold))
-                                    .foregroundStyle(Design.Colors.secondary)
+                            
+                            // Bus Status section header
+                            Text("Bus Status")
+                                .font(.system(size: Design.Typography.heading5Size, weight: .semibold))
+                                .foregroundStyle(Design.Colors.secondary)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.horizontal, Design.Spacing.small)
+                            
+                            // Card containing search and bus list
+                            VStack(alignment: .leading, spacing: Design.Spacing.medium) {
+                                // Search section with icon and label
+                                VStack(alignment: .leading, spacing: 4) {
+                                    HStack {
+                                        Image(systemName: "magnifyingglass")
+                                            .foregroundStyle(Design.Colors.primary)
+                                        Text("Filter Buses")
+                                            .font(.system(size: 14, weight: .medium))
+                                            .foregroundStyle(Design.Colors.darkGrey)
+                                    }
+                                    Spacer()
+                                    
+                                    AppTextField(
+                                        label: "",
+                                        placeholder: "Enter bus number...",
+                                        text: Binding(
+                                            get: { busInfoViewModel.filterText },
+                                            set: { newValue in
+                                                var result = ""
+                                                
+                                                // Handle the input
+                                                for (index, char) in newValue.uppercased().enumerated() {
+                                                    // Stop at max length
+                                                    if index >= 4 { break }
+                                                    
+                                                    // First 3 chars: digits only
+                                                    if index < 3 {
+                                                        if char.isNumber {
+                                                            result.append(char)
+                                                        }
+                                                    }
+                                                    // 4th char: "B" only
+                                                    else if index == 3 && char == "B" {
+                                                        result.append(char)
+                                                    }
+                                                }
+                                                
+                                                busInfoViewModel.filterText = result
+                                            }
+                                        ),
+                                        type: .text,
+                                        autoCapitalization: .none,
+                                        autocorrectionDisabled: true
+                                    )
+                                }
                                 
-                                // Display bus list or empty state
-                                if busInfoViewModel.sortedBusKeys.isEmpty && !busInfoViewModel.isLoading {
-                                    EmptyBusState()
-                                } else {
-                                    BusListView(busInfoViewModel: busInfoViewModel)
+                                // Divider between search and results
+                                Divider()
+                                    .padding(.vertical, 4)
+                                
+                                // Results section
+                                VStack(alignment: .leading, spacing: Design.Spacing.small) {
+                                    if busInfoViewModel.allBusKeysCount == 0 && !busInfoViewModel.isLoading && busInfoViewModel.filterText.isEmpty {
+                                        EmptyBusState()
+                                    } else {
+                                        BusListView(busInfoViewModel: busInfoViewModel)
+                                    }
                                 }
                             }
+                            .padding(Design.Spacing.medium)
+                            .background(Design.Colors.background)
+                            .clipShape(UnevenRoundedRectangle.appStyle(radius: Design.Layout.regularRadius))
+                            .overlay(
+                                UnevenRoundedRectangle.appStyle(radius: Design.Layout.regularRadius)
+                                    .stroke(Design.Colors.border, lineWidth: 1)
+                            )
                             
                             // Last updated information
                             InfoSection(lastUpdated: busInfoViewModel.formattedLastUpdated())
@@ -78,15 +142,15 @@ struct HomeView: View {
                             // Bus map section
                             if let mapUrl = busInfoViewModel.mapUrl {
                                 BusMapView(mapUrl: mapUrl)
+                                    .id(imageId)
                             }
                         }
                         .padding(.horizontal, Design.Spacing.medium)
-                        .padding(.top, Design.Spacing.large)
+                        .padding(.top, Design.Spacing.medium)
                         .padding(.bottom, Design.Spacing.extraLarge)
                     }
                 }
                 .refreshable {
-                    // Native pull-to-refresh functionality
                     await refreshData()
                 }
             }
@@ -107,6 +171,8 @@ struct HomeView: View {
         // Use Task to call the non-async fetchBusInfo
         await withCheckedContinuation { continuation in
             busInfoViewModel.fetchBusInfo()
+            // Refresh image
+            imageId = UUID()
             // Minimum delay for a visible refresh animation
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 continuation.resume()
@@ -115,141 +181,41 @@ struct HomeView: View {
     }
 }
 
-/// Custom navigation header matching website design
 struct CustomNavigationHeader: View {
     let busInfoViewModel: BusInfoViewModel
     let onSignOut: () -> Void
     
     var body: some View {
-        HStack {
-            // Sign out button
-            Button(action: onSignOut) {
-                Image(systemName: "rectangle.portrait.and.arrow.right")
-                    .foregroundStyle(Design.Colors.primary)
-                    .font(.system(size: 18, weight: .medium))
-                    .padding(10)
-                    .background(Design.Colors.background)
-                    .clipShape(UnevenRoundedRectangle.appStyle(radius: Design.Layout.buttonRadius))
-                    .overlay(
-                        UnevenRoundedRectangle.appStyle(radius: Design.Layout.buttonRadius)
-                            .stroke(Design.Colors.border, lineWidth: 1)
-                    )
-            }
-            
-            Spacer()
-            
-            // Logo and title
-            HStack(spacing: Design.Spacing.small) {
-                Image("logo-full")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 32, height: 32)
-                    .clipShape(UnevenRoundedRectangle.appStyle(radius: 8))
-                
-                Text("Runshaw Buses")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(Design.Colors.secondary)
-            }
-            
-            Spacer()
-            
-            // Refresh button
-            Button(action: {
-                busInfoViewModel.fetchBusInfo()
-            }) {
-                Image(systemName: "arrow.clockwise")
-                    .foregroundStyle(Design.Colors.primary)
-                    .font(.system(size: 18, weight: .medium))
-                    .padding(10)
-                    .background(Design.Colors.background)
-                    .clipShape(UnevenRoundedRectangle.appStyle(radius: Design.Layout.buttonRadius))
-                    .overlay(
-                        UnevenRoundedRectangle.appStyle(radius: Design.Layout.buttonRadius)
-                            .stroke(Design.Colors.border, lineWidth: 1)
-                    )
-            }
-        }
-        .padding(.horizontal, Design.Spacing.medium)
-        .padding(.vertical, Design.Spacing.medium)
-        .background(Design.Colors.background)
-        .overlay(
-            Rectangle()
-                .frame(height: 1)
-                .foregroundColor(Design.Colors.border),
-            alignment: .bottom
+        StandardHeader(
+            title: "Runshaw Buses",
+            leftAction: StandardHeader.HeaderAction(
+                iconName: "rectangle.portrait.and.arrow.right", 
+                action: onSignOut
+            ),
+            rightAction: StandardHeader.HeaderAction(
+                iconName: "arrow.clockwise", 
+                action: { busInfoViewModel.fetchBusInfo() }
+            )
         )
     }
 }
 
-/// Hero banner at the top of the home screen
-struct HeroView: View {
-    var body: some View {
-        ZStack(alignment: .bottomLeading) {
-            // Background image with gradient overlay
-            Image("runshaw")
-                .resizable()
-                .scaledToFill()
-                .frame(maxWidth: .infinity)
-                .frame(height: 200)
-                .clipped()
-                .overlay(
-                    LinearGradient(
-                        gradient: Gradient(colors: [
-                            Design.Colors.secondary.opacity(0.8),
-                            Design.Colors.secondary.opacity(0.6),
-                            Design.Colors.secondary.opacity(0.3)
-                        ]),
-                        startPoint: .bottom,
-                        endPoint: .top
-                    )
-                )
-                .clipShape(
-                    UnevenRoundedRectangle.appStyle(radius: Design.Layout.regularRadius)
-                )
-            
-            // Title overlay
-            VStack(alignment: .leading, spacing: Design.Spacing.small) {
-                Text("Welcome to")
-                    .font(.system(size: Design.Typography.bodySize))
-                    .fontWeight(.medium)
-                    .foregroundStyle(Color.white)
-                
-                Text("Runshaw Buses")
-                    .font(.system(size: Design.Typography.heading4Size, weight: .bold))
-                    .foregroundStyle(Design.Colors.primary)
-            }
-            .padding(Design.Spacing.large)
-        }
-        .padding(.horizontal, Design.Spacing.medium)
-        .padding(.top, Design.Spacing.medium)
-    }
+/// Helper function to hide the keyboard
+fileprivate func hideKeyboard() {
+    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
 }
 
 /// Empty state view when no buses are available
 struct EmptyBusState: View {
     var body: some View {
-        VStack(spacing: Design.Spacing.medium) {
-            Image(systemName: "bus")
-                .font(.system(size: 40))
-                .foregroundStyle(Design.Colors.darkGrey.opacity(0.6))
-            
-            Text("No buses currently available")
-                .font(.system(size: Design.Typography.bodySize, weight: .medium))
-                .foregroundStyle(Design.Colors.darkGrey)
-                .multilineTextAlignment(.center)
-                
-            Text("Pull down to refresh")
-                .font(.system(size: 14))
-                .foregroundStyle(Design.Colors.darkGrey)
-                .multilineTextAlignment(.center)
-        }
-        .padding(Design.Spacing.large)
-        .frame(maxWidth: .infinity)
-        .background(Design.Colors.background)
-        .clipShape(UnevenRoundedRectangle.appStyle(radius: Design.Layout.regularRadius))
-        .overlay(
-            UnevenRoundedRectangle.appStyle(radius: Design.Layout.regularRadius)
-                .stroke(Design.Colors.border, lineWidth: 1)
+        StandardEmptyStateView(
+            iconName: "bus",
+            message: "No buses currently available",
+            submessage: "Pull down to refresh",
+            actionTitle: "Refresh Now",
+            action: {
+                // TODO: Implement refresh action
+            }
         )
     }
 }
@@ -261,46 +227,51 @@ struct BusListView: View {
     
     var body: some View {
         VStack(spacing: Design.Spacing.small) {
+            // busInfoViewModel.sortedBusKeys is now filtered
             if busInfoViewModel.sortedBusKeys.isEmpty {
-                Text("No buses available")
-                    .foregroundColor(.red)
-                    .padding()
+                if !busInfoViewModel.filterText.isEmpty {
+                    Text("No buses match your search: \"\(busInfoViewModel.filterText)\"")
+                        .foregroundColor(Design.Colors.darkGrey)
+                        .padding()
+                        .frame(maxWidth: .infinity, minHeight: 100, alignment: .center)
+                } else if busInfoViewModel.allBusKeysCount > 0 { // No search text, but still no results (e.g. all buses departed)
+                     Text("No buses currently available to display.")
+                        .foregroundColor(Design.Colors.darkGrey)
+                        .padding()
+                        .frame(maxWidth: .infinity, minHeight: 100, alignment: .center)
+                }
+                // If allBusKeysCount is 0 and filter is empty, EmptyBusState in HomeView handles it.
             } else {
-                // Bus count indicator
-                Text("Total buses: \(busInfoViewModel.sortedBusKeys.count)")
+                // Bus count indicator (shows filtered count vs total)
+                Text("Showing \(busInfoViewModel.sortedBusKeys.count) of \(busInfoViewModel.allBusKeysCount) buses")
                     .font(.caption)
                     .foregroundColor(.gray)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.bottom, 4)
                 
                 // Bus list
-                ForEach(busInfoViewModel.sortedBusKeys, id: \.self) { busNumber in
-                    BusStatusRow(
-                        busNumber: busNumber,
-                        isArrived: busInfoViewModel.isBusArrived(busNumber: busNumber),
-                        bay: busInfoViewModel.getBayForBus(busNumber: busNumber),
-                        status: busInfoViewModel.getStatusForBus(busNumber: busNumber)
-                    )
-                    
-                    if busInfoViewModel.sortedBusKeys.last != busNumber {
-                        Divider()
+                ScrollView {
+                    ForEach(busInfoViewModel.sortedBusKeys, id: \.self) { busNumber in
+                        BusStatusRow(
+                            busNumber: busNumber,
+                            isArrived: busInfoViewModel.isBusArrived(busNumber: busNumber),
+                            bay: busInfoViewModel.getBayForBus(busNumber: busNumber),
+                            status: busInfoViewModel.getStatusText(busNumber: busNumber)
+                        )
+                        
+                        if busInfoViewModel.sortedBusKeys.last != busNumber {
+                            Divider()
+                        }
                     }
-                }
+                }.frame(maxHeight: 400) // Max height for the scrollable list content
             }
         }
-        .padding(Design.Spacing.medium)
-        .background(Design.Colors.background)
-        .clipShape(UnevenRoundedRectangle.appStyle(radius: Design.Layout.regularRadius))
-        .overlay(
-            UnevenRoundedRectangle.appStyle(radius: Design.Layout.regularRadius)
-                .stroke(Design.Colors.border, lineWidth: 1)
-        )
     }
 }
 
 /// Information section showing last update time
 struct InfoSection: View {
-    /// Formatted last updated timestamp - already processed by BusInfoViewModel
+    /// Formatted last updated timestamp
     let lastUpdated: String
     
     var body: some View {
@@ -473,18 +444,7 @@ struct LoadingOverlay: View {
             Color.black.opacity(0.1)
                 .ignoresSafeArea()
             
-            VStack(spacing: Design.Spacing.medium) {
-                ProgressView()
-                    .scaleEffect(1.5)
-                    .progressViewStyle(CircularProgressViewStyle(tint: Design.Colors.primary))
-                
-                Text("Loading...")
-                    .foregroundStyle(Design.Colors.darkGrey)
-                    .font(.system(size: 16, weight: .medium))
-            }
-            .padding(Design.Spacing.large)
-            .background(Design.Colors.background.opacity(0.9))
-            .clipShape(UnevenRoundedRectangle.appStyle(radius: Design.Layout.regularRadius))
+            StandardLoadingIndicator()
         }
     }
 }
@@ -495,11 +455,9 @@ struct LoadingOverlay: View {
 struct HomeView_Previews: PreviewProvider {
     static var previews: some View {
         // Setup mock services
-        let mockNetworkService = MockNetworkService()
         let mockKeychainService = MockKeychainService()
         let mockAuthService = MockAuthService()
         let mockBusInfoService = MockBusInfoService()
-        let mockNotificationService = MockNotificationService()
         
         // Configure mock data
         mockKeychainService.setupTestUser()
@@ -525,13 +483,9 @@ struct HomeView_Previews: PreviewProvider {
             busInfoService: mockBusInfoService
         )
         
-        // Add sample notifications
-        mockNotificationService.addSampleNotifications()
-        
         // Return the HomeView with mock services
         return HomeView(busInfoViewModel: busInfoViewModel)
             .environmentObject(authViewModel)
-            .environmentObject(mockNotificationService)
             .preferredColorScheme(.light)
     }
 }

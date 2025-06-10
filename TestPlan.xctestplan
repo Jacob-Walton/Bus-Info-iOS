@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "0A89CABA-4571-4C56-9D3E-DEFC466EC258",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "testTimeoutsEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:runshaw-buses.xcodeproj",
+        "identifier" : "16C4D51F2DC6203A00BCF33F",
+        "name" : "runshaw-busesTests"
+      }
+    }
+  ],
+  "version" : 1
+}

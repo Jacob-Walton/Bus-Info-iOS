@@ -6,12 +6,12 @@ struct AppButton: View {
         case secondary
         case outline
     }
-    
+
     let title: String
     let type: ButtonType
     let isLoading: Bool
     let action: () -> Void
-    
+
     init(
         title: String,
         type: ButtonType = .primary,
@@ -23,17 +23,20 @@ struct AppButton: View {
         self.isLoading = isLoading
         self.action = action
     }
-    
+
     var body: some View {
         Button(action: action) {
             HStack(spacing: 10) {
                 if isLoading {
                     ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint:
-                            type == .outline ? Design.Colors.secondary : .white))
+                        .progressViewStyle(
+                            CircularProgressViewStyle(
+                                tint:
+                                    type == .outline ? Design.Colors.secondary : .white)
+                        )
                         .scaleEffect(0.8)
                 }
-                
+
                 Text(title)
                     .font(.system(size: 16, weight: .medium))
             }
@@ -64,7 +67,7 @@ struct SocialSignInButton: View {
     let iconName: String
     let label: String
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
             HStack {
@@ -86,7 +89,7 @@ struct IconTextButton: View {
     let iconName: String
     let label: String
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
             HStack(spacing: 8) {
@@ -99,21 +102,27 @@ struct IconTextButton: View {
     }
 }
 
-#Preview {
-    VStack {
-        VStack {
-            HStack {
-                AppButton(title: "Hello World", type: .primary, action: { })
-                AppButton(title: "Hello World", type: .secondary, action: { })
-                AppButton(title: "Hello World", type: .outline, action: { })
+#if DEBUG
+    /// Preview provider for AppButton and SocialSignInButton
+    struct Buttons_Preview: PreviewProvider {
+        static var previews: some View {
+            VStack {
+                VStack {
+                    HStack {
+                        AppButton(title: "Hello World", type: .primary, action: {})
+                        AppButton(title: "Hello World", type: .secondary, action: {})
+                        AppButton(title: "Hello World", type: .outline, action: {})
+                    }
+                    HStack {
+                        SocialSignInButton(
+                            iconName: "microsoft-logo", label: "Microsoft", action: {})
+                        SocialSignInButton(iconName: "google-logo", label: "Google", action: {})
+                    }
+                }
+                .padding(Design.Spacing.medium)
+                .websiteCard()
             }
-            HStack {
-                SocialSignInButton(iconName: "microsoft-logo", label: "Microsoft", action: { })
-                SocialSignInButton(iconName: "google-logo", label: "Google", action: { })
-            }
+            .padding(Design.Spacing.medium)
         }
-        .padding(Design.Spacing.medium)
-        .websiteCard()
     }
-    .padding(Design.Spacing.medium)
-}
+#endif

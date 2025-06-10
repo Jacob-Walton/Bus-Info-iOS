@@ -47,12 +47,7 @@ struct CardStyle: ViewModifier {
             .clipShape(UnevenRoundedRectangle.appStyle(radius: Design.Layout.regularRadius))
             .overlay(
                 UnevenRoundedRectangle.appStyle(radius: Design.Layout.regularRadius)
-                    .shadow(
-                        color: Design.Colors.shadowColor,
-                        radius: 8,
-                        x: 0,
-                        y: 4
-                    )
+                    .stroke(Design.Colors.border, lineWidth: 1)
             )
     }
 }
@@ -62,6 +57,7 @@ struct TextFieldBorderStyle: ViewModifier {
         content
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
+            .background(Design.Colors.background)
             .clipShape(UnevenRoundedRectangle.appStyle(radius: Design.Layout.buttonRadius))
             .overlay(
                 UnevenRoundedRectangle.appStyle(radius: Design.Layout.buttonRadius)
@@ -91,6 +87,12 @@ extension View {
     
     func textFieldBorderStyle() -> some View {
         self.modifier(TextFieldBorderStyle())
+    }
+    
+    /// Standard section title styling
+    func sectionTitleStyle() -> some View {
+        self.font(.system(size: Design.Typography.heading5Size, weight: .semibold))
+            .foregroundStyle(Design.Colors.secondary)
     }
 }
 
