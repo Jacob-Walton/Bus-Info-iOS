@@ -1,5 +1,7 @@
 import Foundation
 
+// TODO: Cleanup this file, remove unneeded structs
+
 /// Model for registering a device with the backend notification service
 struct DeviceRegistration: Codable {
     /// User identifier for associating notifications with specific user

@@ -3,7 +3,6 @@ import SwiftUI
 /// Settings view for configuring app preferences and account options
 struct SettingsView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
-    @EnvironmentObject var notificationService: NotificationService
     
     /// Use StateObject with a default value as a fallback if environment object is missing
     @StateObject private var fallbackBusInfoViewModel = BusInfoViewModel.create()
@@ -24,7 +23,7 @@ struct SettingsView: View {
     }
     
     // Settings state
-    @State private var enableNotifications = true // TODO: Link to actual notificationService.isSubscribed or similar
+    @State private var enableNotifications = true // TODO: Make this work
     @State private var showPreferredRoutesSeparately = true // TODO: Implement persistence and logic
     @State private var preferredRoutes: [String] = ["809", "819", "821"] // TODO: Load from user preferences
     
@@ -149,7 +148,7 @@ struct SettingsView: View {
                     // Expandable routes selection section
                     if showRoutesSection {
                         VStack(spacing: Design.Spacing.small) {
-                            // Search field with clear button
+                            // Search field
                             AppTextField(
                                 label: "",
                                 placeholder: "Search routes...",
@@ -243,7 +242,6 @@ struct SettingsView: View {
         let isSelected = preferredRoutes.contains(route)
         
         return Button(action: {
-            // Use haptic feedback for selection
             let generator = UIImpactFeedbackGenerator(style: .light)
             generator.prepare()
             
@@ -393,7 +391,7 @@ struct SettingsView: View {
                     Text("This app is an independent project and is not affiliated with, endorsed, or sponsored by Runshaw College.")
                         .font(.system(size: 14))
                         .foregroundColor(Design.Colors.darkGrey)
-                        .padding(.leading, 24 + Design.Spacing.medium) // Align with text above
+                        .padding(.leading, 24 + Design.Spacing.medium)
                 }
                 .padding(Design.Spacing.medium)
                 Divider()
@@ -493,14 +491,12 @@ struct SettingsView: View {
         }
     }
 
-    // Add back the addRoute function (now uses toggleRoute)
     private func addRoute(_ route: String) {
         if !preferredRoutes.contains(route) {
             toggleRoute(route)
         }
     }
 
-    // Updated toggle method that handles both adding and removing
     private func toggleRoute(_ route: String) {
         if preferredRoutes.contains(route) {
             preferredRoutes.removeAll { $0 == route }
@@ -518,7 +514,7 @@ struct SettingsView: View {
         return "v\(version) (Build \(build))"
     }
     
-    // Add helper function to hide keyboard
+    /// Helper function to hide keyboard
     private func hideKeyboard() {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }

@@ -13,9 +13,6 @@ struct HomeView: View {
     /// Authentication view model for managing user session
     @EnvironmentObject var authViewModel: AuthViewModel
     
-    /// Notification service for managing push notifications
-    @EnvironmentObject var notificationService: NotificationService
-    
     /// View model for bus information and status
     @StateObject private var busInfoViewModel: BusInfoViewModel
     
@@ -64,7 +61,7 @@ struct HomeView: View {
                         // Main content sections
                         VStack(spacing: Design.Spacing.large) {
                             
-                            // Bus Status section header (moved outside the card)
+                            // Bus Status section header
                             Text("Bus Status")
                                 .font(.system(size: Design.Typography.heading5Size, weight: .semibold))
                                 .foregroundStyle(Design.Colors.secondary)
@@ -90,10 +87,9 @@ struct HomeView: View {
                                         text: Binding(
                                             get: { busInfoViewModel.filterText },
                                             set: { newValue in
-                                                // Ultra-simplified sanitization to minimize processing
                                                 var result = ""
                                                 
-                                                // Handle the input with minimal operations and explicit bounds checking
+                                                // Handle the input
                                                 for (index, char) in newValue.uppercased().enumerated() {
                                                     // Stop at max length
                                                     if index >= 4 { break }
@@ -110,7 +106,6 @@ struct HomeView: View {
                                                     }
                                                 }
                                                 
-                                                // Simple direct assignment
                                                 busInfoViewModel.filterText = result
                                             }
                                         ),
@@ -256,7 +251,6 @@ struct BusListView: View {
                 
                 // Bus list
                 ScrollView {
-                    // ForEach now iterates over the filtered list from busInfoViewModel.sortedBusKeys
                     ForEach(busInfoViewModel.sortedBusKeys, id: \.self) { busNumber in
                         BusStatusRow(
                             busNumber: busNumber,
@@ -265,7 +259,6 @@ struct BusListView: View {
                             status: busInfoViewModel.getStatusText(busNumber: busNumber)
                         )
                         
-                        // Divider logic also uses the filtered list
                         if busInfoViewModel.sortedBusKeys.last != busNumber {
                             Divider()
                         }
@@ -465,7 +458,6 @@ struct HomeView_Previews: PreviewProvider {
         let mockKeychainService = MockKeychainService()
         let mockAuthService = MockAuthService()
         let mockBusInfoService = MockBusInfoService()
-        let mockNotificationService = MockNotificationService()
         
         // Configure mock data
         mockKeychainService.setupTestUser()
@@ -490,16 +482,10 @@ struct HomeView_Previews: PreviewProvider {
         let busInfoViewModel = BusInfoViewModel(
             busInfoService: mockBusInfoService
         )
-        // Example: To test filtering in preview
-        // busInfoViewModel.filterText = "12"
-        
-        // Add sample notifications
-        mockNotificationService.addSampleNotifications()
         
         // Return the HomeView with mock services
         return HomeView(busInfoViewModel: busInfoViewModel)
             .environmentObject(authViewModel)
-            .environmentObject(mockNotificationService)
             .preferredColorScheme(.light)
     }
 }

@@ -654,3 +654,14 @@ class AuthViewModel: ObservableObject {
         }
     }
 }
+
+// MARK: - Factory Method
+
+extension AuthViewModel {
+    static func create() -> AuthViewModel {
+        // Get auth service from environment, if not exists, create new one
+        let authService = AuthService.create()
+        let keychainService = KeychainService.create()
+        return AuthViewModel(authService: authService, keychainService: keychainService)
+    }
+}

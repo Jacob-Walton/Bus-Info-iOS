@@ -143,6 +143,13 @@ class KeychainService: KeychainServiceProtocol {
     }
 }
 
+// MARK: - Factory Method
+extension KeychainService {
+    static func create() -> KeychainServiceProtocol {
+        return KeychainService()
+    }
+}
+
 // MARK: - Mock Implementation
 
 #if DEBUG

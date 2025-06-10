@@ -22,8 +22,6 @@ struct runshaw_busesApp: App {
     
     /// Authentication view model for managing user state
     @StateObject private var authViewModel: AuthViewModel
-    /// Notification service for managing push notifications
-    @StateObject private var notificationService: NotificationService
     
     /// App delegate for handling system events
     @UIApplicationDelegateAdaptor private var appDelegate: AppDelegate
@@ -42,7 +40,6 @@ struct runshaw_busesApp: App {
         
         // Initialize view models with dependencies
         self._authViewModel = StateObject(wrappedValue: AuthViewModel(authService: auth))
-        self._notificationService = StateObject(wrappedValue: NotificationService(networkService: network))
         
         // Configure third-party services
         configureGoogleSignIn()
@@ -61,7 +58,6 @@ struct runshaw_busesApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(authViewModel)
-                .environmentObject(notificationService)
                 .preferredColorScheme(.light)
                 // Handle deep links for authentication callbacks
                 .onOpenURL { url in
@@ -110,11 +106,5 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     /// Called when registration for remote notifications fails
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         print("Failed to register for remote notifications: \(error.localizedDescription)")
-    }
-    
-    /// Called when the app becomes active (after launch or returning from background)
-    func applicationDidBecomeActive(_ application: UIApplication) {
-        // Clear all badge notifications when the app becomes active
-        (NotificationService.shared as? NotificationService)?.clearBadges()
     }
 }

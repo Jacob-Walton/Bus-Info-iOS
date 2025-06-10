@@ -39,7 +39,6 @@ struct FullScreenMapView: View {
 
     var body: some View {
         ZStack {
-            // Black background for better visibility
             Color.black
                 .ignoresSafeArea()
 
@@ -107,9 +106,8 @@ struct FullScreenMapView: View {
                 }
             }
 
-            // Custom header bar
+            // Header bar
             VStack {
-                // Custom header with close and reset buttons
                 HStack {
                     Button(action: {
                         isPresented = false
@@ -158,7 +156,7 @@ struct FullScreenMapView: View {
                     .padding(.bottom)
             }
         }
-        .preferredColorScheme(.dark)  // Force dark mode for better viewing
+        .preferredColorScheme(.dark)
     }
 }
 

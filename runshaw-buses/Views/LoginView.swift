@@ -274,4 +274,4 @@ class AppleSignInCoordinator: NSObject, ASAuthorizationControllerDelegate,
                 .environmentObject(authViewModel)
         }
     }
-#endif
+#endif // DEBUG

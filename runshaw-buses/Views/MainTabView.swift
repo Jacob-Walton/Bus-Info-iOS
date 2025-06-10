@@ -13,9 +13,6 @@ struct MainTabView: View {
     /// Authentication view model for managing user session
     @EnvironmentObject var authViewModel: AuthViewModel
     
-    /// Notification service for managing push notifications
-    @EnvironmentObject var notificationService: NotificationService
-    
     /// Currently selected tab
     @State private var selectedTab = 0
     
@@ -29,16 +26,16 @@ struct MainTabView: View {
             
             RankingsView()
                 .tabItem {
-                    Label("Rankings", systemImage: "trophy.fill") // Using trophy.fill for selected state
+                    Label("Rankings", systemImage: "trophy.fill")
                 }
                 .tag(1)
             
             SettingsView()
                 .tabItem {
-                    Label("Settings", systemImage: "gearshape.fill") // Using gearshape.fill for selected state
+                    Label("Settings", systemImage: "gearshape.fill")
                 }
                 .tag(2)
         }
-        .tint(Design.Colors.primary) // Apply the app's primary color to the tab bar items
+        .tint(Design.Colors.primary)
     }
 }

@@ -18,7 +18,6 @@ struct RankingsView: View {
             Design.Colors.lightGrey.ignoresSafeArea()
 
             VStack(spacing: 0) {
-                // Standard header component for UI consistency
                 StandardHeader(
                     title: "Bus Rankings",
                     leftAction: StandardHeader.HeaderAction(
