@@ -73,3 +73,6 @@ tags
 .idea/
 *.iml
 .vscode/
+
+# Firebase config
+GoogleService-Info.plist

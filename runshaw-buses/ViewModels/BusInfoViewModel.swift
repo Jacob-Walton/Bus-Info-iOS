@@ -17,6 +17,12 @@ class BusInfoViewModel: ObservableObject {
     @Published var isLoadingRoutes: Bool = false
     @Published var routesError: String?
 
+    /// Bus rankings
+    @Published var busRankings: [BusRanking] = []
+    @Published var rankingsLastUpdated: String?
+    @Published var isLoadingRankings: Bool = false
+    @Published var rankingsError: String?
+
     private var allSortedBusKeys: [String] = []  // Stores all bus keys, sorted, before filtering
     private var busInfoService: BusInfoServiceProtocol
     private var cancellables = Set<AnyCancellable>()
@@ -52,6 +58,9 @@ class BusInfoViewModel: ObservableObject {
 
         // Fetch available bus routes
         fetchAvailableBusRoutes()
+        
+        // Fetch bus rankings - but don't start loading immediately
+        // Let the view trigger this when it appears
     }
 
     deinit {
@@ -187,6 +196,7 @@ class BusInfoViewModel: ObservableObject {
 
         // First try with ISO8601DateFormatter
         let isoFormatter = ISO8601DateFormatter()
+        isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds] // Add .withFractionalSeconds
         var date: Date?
 
         // Try to parse the date with ISO formatter (preserving time zone)
@@ -339,6 +349,121 @@ class BusInfoViewModel: ObservableObject {
                 }
             )
             .store(in: &cancellables)
+    }
+    
+    /// Fetch list of bus rankings
+    func fetchBusRankings() {
+        // Don't start a new request if one is already in progress
+        guard !isLoadingRankings else {
+            #if DEBUG
+                print("Rankings fetch already in progress, skipping...")
+            #endif
+            return
+        }
+        
+        isLoadingRankings = true
+        rankingsError = nil
+
+        #if DEBUG
+            print("Fetching bus rankings...")
+        #endif
+
+        busInfoService.getBusRankings()
+            .receive(on: DispatchQueue.main)
+            .sink(
+                receiveCompletion: { [weak self] completion in
+                    guard let self = self else { return }
+                    self.isLoadingRankings = false
+
+                    if case .failure(let error) = completion {
+                        if case .unauthorized = error {
+                            self.rankingsError = "Unauthorized access. Please log in again."
+                        } else {
+                            #if DEBUG
+                                print("Failed to load bus rankings: \(error.localizedDescription)")
+                            #endif
+
+                            self.rankingsError = "Failed to load bus rankings. Please try again later."
+                        }
+                    }
+                },
+                receiveValue: { [weak self] rankings in
+                    guard let self = self else { return }
+                    
+                    #if DEBUG
+                        print("Received \(rankings.busRankings.count) bus rankings.")
+                    #endif
+
+                    self.busRankings = rankings.busRankings
+                    self.rankingsLastUpdated = rankings.lastUpdated
+                    self.rankingsError = nil
+                }
+            )
+            .store(in: &cancellables)
+    }
+
+    /// Format the rankings last updated time
+    /// - Returns: A formatted string representing the rankings last updated time
+    func formattedRankingsLastUpdated() -> String {
+        guard let lastUpdated = rankingsLastUpdated else {
+            return "Unknown"
+        }
+
+        // Use the same date formatting logic as formattedLastUpdated()
+        let isoFormatter = ISO8601DateFormatter()
+        isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds] // Add .withFractionalSeconds
+        var date: Date?
+
+        date = isoFormatter.date(from: lastUpdated)
+
+        if date == nil {
+            let customFormatter = [
+                "yyyy-MM-dd'T'HH:mm:ss'Z'",
+                "yyyy-MM-dd'T'HH:mm:ssZ",
+                "yyyy-MM-dd'T'HH:mm:ss"
+            ]
+
+            let dateFormatter = DateFormatter()
+            dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+            dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
+
+            for format in customFormatter {
+                dateFormatter.dateFormat = format
+                if let parsedDate = dateFormatter.date(from: lastUpdated) {
+                    date = parsedDate
+                    break
+                }
+            }
+        }
+
+        if let date = date {
+            let timeFormatter = DateFormatter()
+            timeFormatter.dateFormat = "HH:mm:ss"
+            timeFormatter.timeZone = TimeZone.current
+            let timeString = timeFormatter.string(from: date)
+
+            var userCalendar = Calendar.current
+            userCalendar.timeZone = TimeZone.current
+
+            if userCalendar.isDateInToday(date) {
+                return "Today at \(timeString)"
+            } else if userCalendar.isDateInYesterday(date) {
+                return "Yesterday at \(timeString)"
+            } else {
+                let weekdayFormatter = DateFormatter()
+                weekdayFormatter.dateFormat = "EEEE 'at' HH:mm:ss"
+                weekdayFormatter.timeZone = TimeZone.current
+                let weekdayString = weekdayFormatter.string(from: date)
+                return weekdayString
+            }
+        }
+
+        #if DEBUG
+            print("Failed to parse rankings last updated date: \(lastUpdated)")
+        #endif
+
+        // Return raw string if parsing fails
+        return lastUpdated
     }
 }
 

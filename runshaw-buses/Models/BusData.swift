@@ -61,3 +61,58 @@ struct BusData: Codable {
         id = try container.decodeIfPresent(Int.self, forKey: .id)
     }
 }
+
+struct BusRankings: Codable {
+    let busRankings: [BusRanking]
+    let lastUpdated: String
+    
+    enum CodingKeys: String, CodingKey {
+        case rankings, lastUpdated
+    }
+    
+    // Standard initializer
+    init(busRankings: [BusRanking], lastUpdated: String) {
+        self.busRankings = busRankings
+        self.lastUpdated = lastUpdated
+    }
+    
+    // Decoder
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        // Decode the nested rankings dictionary
+        let rankingsDict = try container.decode([String: BusRanking].self, forKey: .rankings)
+        
+        // Convert dictionary to array and sort by rank
+        busRankings = Array(rankingsDict.values).sorted { $0.rank < $1.rank }
+        
+        lastUpdated = try container.decode(String.self, forKey: .lastUpdated)
+        
+        #if DEBUG
+        print("Successfully decoded \(busRankings.count) bus rankings")
+        #endif
+    }
+    
+    // Encoder
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        // Convert array back to dictionary for encoding
+        let rankingsDict = Dictionary(uniqueKeysWithValues: busRankings.map { ($0.service, $0) })
+        try container.encode(rankingsDict, forKey: .rankings)
+        try container.encode(lastUpdated, forKey: .lastUpdated)
+    }
+}
+
+struct BusRanking: Codable, Equatable {
+    let service: String
+    let rank: Int
+    let score: Int
+    
+    // Standard initializer
+    init(service: String, rank: Int, score: Int) {
+        self.service = service
+        self.rank = rank
+        self.score = score
+    }
+}

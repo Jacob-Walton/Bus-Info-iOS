@@ -1,134 +1,146 @@
 import SwiftUI
 
-/// Custom tab bar with styling consistent with the app's design system
-struct CustomTabBar: View {
-    /// Binding to the selected tab index
-    @Binding var selectedTab: Int
+/// Custom tab bar item configuration
+struct TabItem {
+    let id: String
+    let iconName: String
+    let title: String
+    let view: AnyView
     
-    /// Array of tab items to display
-    let tabs: [TabItem]
-    
-    /// Tab item definition
-    struct TabItem {
-        let icon: String
-        let title: String
-        
-        init(icon: String, title: String) {
-            self.icon = icon
-            self.title = title
-        }
-    }
-    
-    var body: some View {
-        HStack {
-            ForEach(0..<tabs.count, id: \.self) { index in
-                Spacer()
-                
-                tabButton(
-                    icon: tabs[index].icon,
-                    title: tabs[index].title,
-                    isSelected: selectedTab == index,
-                    action: { withAnimation(.easeInOut(duration: 0.2)) { selectedTab = index } }
-                )
-                
-                Spacer()
-            }
-        }
-        .padding(.vertical, 12)
-        .background(Design.Colors.background)
-        .overlay(
-            Rectangle()
-                .frame(height: 1)
-                .foregroundColor(Design.Colors.border),
-            alignment: .top
-        )
-    }
-    
-    /// Creates a single tab button
-    @ViewBuilder
-    private func tabButton(icon: String, title: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            VStack(spacing: 4) {
-                Image(systemName: icon)
-                    .font(.system(size: 20))
-                    .foregroundColor(isSelected ? Design.Colors.primary : Design.Colors.darkGrey)
-                
-                Text(title)
-                    .font(.system(size: 12))
-                    .foregroundColor(isSelected ? Design.Colors.primary : Design.Colors.darkGrey)
-            }
-            .frame(minWidth: 60)
-        }
+    init<V: View>(id: String, iconName: String, title: String, @ViewBuilder content: () -> V) {
+        self.id = id
+        self.iconName = iconName
+        self.title = title
+        self.view = AnyView(content())
     }
 }
 
-/// Container view that manages custom tab navigation
-struct CustomTabViewContainer<Content: View>: View {
-    /// Currently selected tab index
-    @Binding var selection: Int
+/// Custom tab bar that matches the app's design system
+struct CustomTabBar: View {
+    let tabs: [TabItem]
+    @Binding var selectedTab: String
     
-    /// Content views for each tab
-    let content: Content
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(tabs, id: \.id) { tab in
+                TabBarButton(
+                    tab: tab,
+                    isSelected: selectedTab == tab.id
+                ) {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                        selectedTab = tab.id
+                    }
+                }
+            }
+        }
+        .padding(.horizontal, Design.Spacing.medium)
+        .padding(.vertical, Design.Spacing.small)
+        .background(
+            UnevenRoundedRectangle.appStyle(radius: Design.Layout.regularRadius)
+                .fill(Design.Colors.background)
+                .shadow(color: Design.Colors.shadowColor.opacity(0.15), radius: 12, x: 0, y: -4)
+        )
+        .overlay(
+            UnevenRoundedRectangle.appStyle(radius: Design.Layout.regularRadius)
+                .stroke(Design.Colors.border.opacity(0.5), lineWidth: 0.5),
+            alignment: .top
+        )
+        .padding(.horizontal, Design.Spacing.small)
+        .padding(.bottom, Design.Spacing.tiny)
+    }
+}
+
+/// Individual tab bar button with improved styling
+struct TabBarButton: View {
+    let tab: TabItem
+    let isSelected: Bool
+    let action: () -> Void
     
-    init(selection: Binding<Int>, @ViewBuilder content: () -> Content) {
-        self._selection = selection
-        self.content = content()
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 6) {
+                // Icon container with background
+                ZStack {
+                    // Selected state background
+                    if isSelected {
+                        UnevenRoundedRectangle.appStyle(radius: Design.Layout.buttonRadius)
+                            .fill(Design.Colors.primary)
+                            .frame(width: 48, height: 32)
+                            .transition(.scale.combined(with: .opacity))
+                    }
+                    
+                    // Icon
+                    Image(systemName: tab.iconName)
+                        .font(.system(size: 18, weight: isSelected ? .semibold : .medium))
+                        .foregroundColor(isSelected ? .white : Design.Colors.darkGrey)
+                        .scaleEffect(isSelected ? 1.0 : 0.9)
+                }
+                
+                // Label
+                Text(tab.title)
+                    .font(.system(size: 11, weight: isSelected ? .semibold : .medium))
+                    .foregroundColor(isSelected ? Design.Colors.primary : Design.Colors.darkGrey)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(PlainButtonStyle())
+        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: isSelected)
+    }
+}
+
+/// Container view that manages tab navigation with custom tab bar
+struct CustomTabNavigationView: View {
+    let tabs: [TabItem]
+    @State private var selectedTab: String
+    
+    init(tabs: [TabItem], initialTab: String? = nil) {
+        self.tabs = tabs
+        self._selectedTab = State(initialValue: initialTab ?? tabs.first?.id ?? "")
     }
     
     var body: some View {
-        ZStack(alignment: .bottom) {
-            // Tab content
-            TabView(selection: $selection) {
-                content
+        VStack(spacing: 0) {
+            // Content area
+            ZStack {
+                ForEach(tabs, id: \.id) { tab in
+                    if selectedTab == tab.id {
+                        tab.view
+                            .transition(.opacity)
+                    }
+                }
             }
-            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             
             // Custom tab bar
-            CustomTabBar(
-                selectedTab: $selection,
-                tabs: [
-                    .init(icon: "house", title: "Home"),
-                    .init(icon: "trophy", title: "Rankings"),
-                    .init(icon: "gearshape", title: "Settings")
-                ]
-            )
-            .background(Design.Colors.background)
+            CustomTabBar(tabs: tabs, selectedTab: $selectedTab)
+                .background(Design.Colors.lightGrey.ignoresSafeArea(edges: .bottom))
         }
+        .ignoresSafeArea(.keyboard, edges: .bottom)
     }
 }
 
 #if DEBUG
-/// Preview provider for CustomTabViewContainer
-struct CustomTabViewContainer_Previews: PreviewProvider {
+/// Preview provider for CustomTabBar
+struct CustomTabBar_Previews: PreviewProvider {
     static var previews: some View {
-        TabBarPreview()
-            .previewLayout(.sizeThatFits)
-            .padding()
-    }
-
-    struct TabBarPreview: View {
-        @State private var selectedTab = 0
-        
-        var body: some View {
-            CustomTabViewContainer(
-                selection: $selectedTab
-            ) {
-                Text("Home Tab")
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(Design.Colors.lightGrey)
-                    .tag(0)
-                
-                Text("Rankings Tab")
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(Design.Colors.lightGrey)
-                    .tag(1)
-                
-                Text("Settings Tab")
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(Design.Colors.lightGrey)
-                    .tag(2)
-            }
+        VStack {
+            Spacer()
+            
+            CustomTabBar(
+                tabs: [
+                    TabItem(id: "home", iconName: "house.fill", title: "Home") { Text("Home") },
+                    TabItem(id: "rankings", iconName: "trophy.fill", title: "Rankings") { Text("Rankings") },
+                    TabItem(id: "settings", iconName: "gearshape.fill", title: "Settings") { Text("Settings") }
+                ],
+                selectedTab: .constant("home")
+            )
         }
+        .background(Design.Colors.lightGrey)
+        .previewLayout(.sizeThatFits)
     }
 }
 #endif
