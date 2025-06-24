@@ -15,6 +15,10 @@
 	</array>
 	<key>GIDClientID</key>
 	<string>219233013774-uenqrkjnrdkci1v8bfrha1e0tip87nbt.apps.googleusercontent.com</string>
+	<key>UIDesign</key>
+	<string></string>
+	<key>UIDesignRequiresCompatibility</key>
+	<true/>
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>

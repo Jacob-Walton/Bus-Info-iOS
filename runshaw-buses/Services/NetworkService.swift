@@ -86,22 +86,22 @@ class NetworkService: NetworkServiceProtocol {
         request.addValue("application/json", forHTTPHeaderField: "Accept")
 
         // Apply authentication based on auth type
-        if let token = keychainService.getAuthToken(), !endpoint.contains("login") {
-            switch authType {
-                case .bearer:
-                // Standard bearer token authentication
+        switch authType {
+        case .bearer:
+            // Only apply bearer token if we have one and this isn't a login endpoint
+            if let token = keychainService.getAuthToken(), !endpoint.contains("login") {
                 request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
                 #if DEBUG
                 print("Using Bearer token for authentication: \(token.prefix(8))...")
                 #endif
-                
-                case .none:
-                // No authentication required
-                #if DEBUG
-                print("No authentication required for this request.")
-                #endif
-                break
             }
+            
+        case .none:
+            // No authentication required - explicitly skip any auth headers
+            #if DEBUG
+            print("No authentication required for this request.")
+            #endif
+            break
         }
 
         // Apply additional headers

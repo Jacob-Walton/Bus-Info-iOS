@@ -21,7 +21,7 @@ struct ContentView: View {
                     .transition(.opacity)
                     .id("main-\(authViewModel.currentUser?.id ?? "unknown")")  // Force view refresh when user changes
             case .signedOut:
-                LoginView()
+                LoginViewWrapper()
                     .transition(.opacity)
             case .loading:
                 loadingView

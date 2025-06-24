@@ -66,6 +66,26 @@ struct TextFieldBorderStyle: ViewModifier {
     }
 }
 
+struct TabBarStyle: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .padding(.horizontal, Design.Spacing.medium)
+            .padding(.vertical, Design.Spacing.small)
+            .background(
+                UnevenRoundedRectangle.appStyle(radius: Design.Layout.regularRadius)
+                    .fill(Design.Colors.background)
+                    .shadow(color: Design.Colors.shadowColor.opacity(0.15), radius: 12, x: 0, y: -4)
+            )
+            .overlay(
+                UnevenRoundedRectangle.appStyle(radius: Design.Layout.regularRadius)
+                    .stroke(Design.Colors.border.opacity(0.5), lineWidth: 0.5),
+                alignment: .top
+            )
+            .padding(.horizontal, Design.Spacing.small)
+            .padding(.bottom, Design.Spacing.tiny)
+    }
+}
+
 // MARK: - View Extensions
 
 extension View {
@@ -87,6 +107,10 @@ extension View {
     
     func textFieldBorderStyle() -> some View {
         self.modifier(TextFieldBorderStyle())
+    }
+    
+    func tabBarStyle() -> some View {
+        self.modifier(TabBarStyle())
     }
     
     /// Standard section title styling

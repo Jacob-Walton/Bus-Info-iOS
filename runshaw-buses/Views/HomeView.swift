@@ -14,20 +14,10 @@ struct HomeView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
     
     /// View model for bus information and status
-    @StateObject private var busInfoViewModel: BusInfoViewModel
+    @EnvironmentObject var busInfoViewModel: BusInfoViewModel
     
     /// Image ID for force reloading
     @State var imageId: UUID = UUID()
-    
-    /// Initialize with dependencies
-    init(busInfoViewModel: BusInfoViewModel? = nil) {
-        // Use provided view model or create a new one using factory
-        if let viewModel = busInfoViewModel {
-            _busInfoViewModel = StateObject(wrappedValue: viewModel)
-        } else {
-            _busInfoViewModel = StateObject(wrappedValue: BusInfoViewModel.create())
-        }
-    }
     
     var body: some View {
         ZStack {
@@ -190,7 +180,10 @@ struct CustomNavigationHeader: View {
             title: "Runshaw Buses",
             leftAction: StandardHeader.HeaderAction(
                 iconName: "rectangle.portrait.and.arrow.right", 
-                action: onSignOut
+                action: {
+                    // Sign out
+                    onSignOut()
+                }
             ),
             rightAction: StandardHeader.HeaderAction(
                 iconName: "arrow.clockwise", 
@@ -484,7 +477,8 @@ struct HomeView_Previews: PreviewProvider {
         )
         
         // Return the HomeView with mock services
-        return HomeView(busInfoViewModel: busInfoViewModel)
+        return HomeView()
+            .environmentObject(busInfoViewModel)
             .environmentObject(authViewModel)
             .preferredColorScheme(.light)
     }

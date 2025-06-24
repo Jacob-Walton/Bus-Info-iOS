@@ -13,29 +13,28 @@ struct MainTabView: View {
     /// Authentication view model for managing user session
     @EnvironmentObject var authViewModel: AuthViewModel
     
-    /// Currently selected tab
-    @State private var selectedTab = 0
+    /// Bus info view model for managing bus information
+    @EnvironmentObject var busInfoViewModel: BusInfoViewModel
+    
+    /// Tab items configuration
+    private var tabItems: [TabItem] {
+        [
+            TabItem(id: "home", iconName: "house.fill", title: "Home") {
+                HomeView()
+            },
+            TabItem(id: "rankings", iconName: "trophy.fill", title: "Rankings") {
+                RankingsView()
+            },
+            TabItem(id: "settings", iconName: "gearshape.fill", title: "Settings") {
+                SettingsView()
+            }
+        ]
+    }
     
     var body: some View {
-        TabView(selection: $selectedTab) {
-            HomeView()
-                .tabItem {
-                    Label("Home", systemImage: "house.fill")
-                }
-                .tag(0)
-            
-            RankingsView()
-                .tabItem {
-                    Label("Rankings", systemImage: "trophy.fill")
-                }
-                .tag(1)
-            
-            SettingsView()
-                .tabItem {
-                    Label("Settings", systemImage: "gearshape.fill")
-                }
-                .tag(2)
-        }
-        .tint(Design.Colors.primary)
+        CustomTabNavigationView(
+            tabs: tabItems,
+            initialTab: "home"
+        )
     }
 }

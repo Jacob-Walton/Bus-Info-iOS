@@ -10,4 +10,7 @@ protocol BusInfoServiceProtocol {
     
     /// Fetch list of available bus routes
     func getBusRoutes() -> AnyPublisher<[String], NetworkError>
+    
+    /// Fetch list of bus rankings
+    func getBusRankings() -> AnyPublisher<BusRankings, NetworkError>
 }
