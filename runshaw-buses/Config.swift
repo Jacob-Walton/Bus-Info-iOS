@@ -122,19 +122,19 @@ struct FileConfig: EnvironmentConfigurable {
 
 /// Development configuration
 struct DevelopmentConfig: EnvironmentConfigurable {
-    var baseURL: URL { URL(string: "https://dev.example.com/api")! } // Replace with your actual dev URL
-    var apiTimeout: TimeInterval { 30 }
+    var baseURL: URL { URL(string: "https://rb.dev.konpeki.co.uk/api")! }
+    var apiTimeout: TimeInterval { 45 }
     var logLevel: LogLevel { .debug }
 }
 
 struct StagingConfig: EnvironmentConfigurable {
-    var baseURL: URL { URL(string: "https://staging.example.com/api")! } // Replace with your actual staging URL
+    var baseURL: URL { URL(string: "https://rb.staging.konpeki.co.uk/api")! }
     var apiTimeout: TimeInterval { 60 }
     var logLevel: LogLevel { .info }
 }
 
 struct ProductionConfig: EnvironmentConfigurable {
-    var baseURL: URL { URL(string: "https://api.example.com/api")! } // Replace with your actual production URL
-    var apiTimeout: TimeInterval { 60 }
+    var baseURL: URL { URL(string: "https://rb.konpeki.co.uk/api")! }
+    var apiTimeout: TimeInterval { 30 }
     var logLevel: LogLevel { .warning }
 }

@@ -35,18 +35,13 @@ struct CustomTabBar: View {
         }
         .padding(.horizontal, Design.Spacing.medium)
         .padding(.vertical, Design.Spacing.small)
-        .background(
-            UnevenRoundedRectangle.appStyle(radius: Design.Layout.regularRadius)
-                .fill(Design.Colors.background)
-                .shadow(color: Design.Colors.shadowColor.opacity(0.15), radius: 12, x: 0, y: -4)
-        )
+        .background(Design.Colors.background)
         .overlay(
-            UnevenRoundedRectangle.appStyle(radius: Design.Layout.regularRadius)
-                .stroke(Design.Colors.border.opacity(0.5), lineWidth: 0.5),
+            Rectangle()
+                .fill(Design.Colors.border)
+                .frame(height: 1),
             alignment: .top
         )
-        .padding(.horizontal, Design.Spacing.small)
-        .padding(.bottom, Design.Spacing.tiny)
     }
 }
 
@@ -117,7 +112,7 @@ struct CustomTabNavigationView: View {
             
             // Custom tab bar
             CustomTabBar(tabs: tabs, selectedTab: $selectedTab)
-                .background(Design.Colors.lightGrey.ignoresSafeArea(edges: .bottom))
+                .background(Design.Colors.background.ignoresSafeArea(edges: .bottom))
         }
         .ignoresSafeArea(.keyboard, edges: .bottom)
     }

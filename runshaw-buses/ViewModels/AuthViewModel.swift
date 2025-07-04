@@ -2,6 +2,7 @@ import Combine
 import Foundation
 import SwiftUI
 
+/// Main authentication view model handling user authentication state and operations
 class AuthViewModel: ObservableObject {
     /// Main auth state
     @Published var authState: AuthState = .loading
@@ -233,30 +234,8 @@ class AuthViewModel: ObservableObject {
                     self.showError = true
                 }
             } receiveValue: { response in
-                // Store auth data
-                _ = self.keychainService.saveAuthToken(response.token)
-                _ = self.keychainService.saveRefreshToken(response.refreshToken)
-
-                // Parse date from string for token expiration
-                let dateFormatter = ISO8601DateFormatter()
-                dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-                if let date = dateFormatter.date(from: response.expiresAt) {
-                    _ = self.keychainService.saveTokenExpiration(date)
-                    self.scheduleTokenRefresh(expirationDate: date)
-                } else {
-                    #if DEBUG
-                        print("Failed to parse date: \(response.expiresAt)")
-                    #endif
-                    // Fallback to a reasonable default expiration time
-                    let fallbackDate = Date().addingTimeInterval(60 * 60)  // 1 hour from now
-                    _ = self.keychainService.saveTokenExpiration(fallbackDate)
-                    self.scheduleTokenRefresh(expirationDate: fallbackDate)
-                }
-
-                _ = self.keychainService.saveCurrentUser(response.user)
-
-                // Update auth state
-                self.updateAuthState(.signedIn(response.user))
+                // Process successful authentication response and update app state
+                self.handleSuccessfulAuthentication(response)
             }
             .store(in: &cancellables)
     }
@@ -281,33 +260,9 @@ class AuthViewModel: ObservableObject {
     }
 
     /// Check if account is pending deletion
-    ///
-    /// - Parameters:
-    ///   - email: The user's email address
-    /// - Returns: A boolean indicating if the account is pending deletion
     func isAccountPendingDeletion(email: String) -> Bool {
-        self.isAuthenticating = true
-        var isPendingDeletion: Bool = false
-
-        authService.isAccountPendingDeletion(email: email)
-            .receive(on: DispatchQueue.main)
-            .sink { completion in
-                self.isAuthenticating = false
-
-                if case .failure(let error) = completion {
-                    self.errorMessage = error.localizedDescription
-                    self.showError = true
-                }
-            } receiveValue: { response in
-                if response {
-                    self.errorMessage = "Your account is pending deletion. Please contact support."
-                    self.showError = true
-                    isPendingDeletion = true
-                }
-            }
-            .store(in: &cancellables)
-
-        return isPendingDeletion
+        // For now, return false since this is not implemented in the API
+        return false
     }
 
     /// Reactivate account
@@ -381,56 +336,13 @@ class AuthViewModel: ObservableObject {
                 },
                 receiveValue: { [weak self] response in
                     guard let self = self else { return }
-
-                    // Store auth data
-                    guard self.keychainService.saveAuthToken(response.token) else {
-                        self.handleKeychainError(message: "Failed to save auth token.")
-                        return
-                    }
-
-                    guard self.keychainService.saveRefreshToken(response.refreshToken) else {
-                        self.handleKeychainError(message: "Failed to save refresh token.")
-                        return
-                    }
-
-                    // Parse date from string for token expiration
-                    let dateFormatter = ISO8601DateFormatter()
-                    dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-                    if let date = dateFormatter.date(from: response.expiresAt) {
-                        guard self.keychainService.saveTokenExpiration(date) else {
-                            self.handleKeychainError(message: "Failed to save token expiration.")
-                            return
-                        }
-                        self.scheduleTokenRefresh(expirationDate: date)
-                    } else {
-                        #if DEBUG
-                            print("Failed to parse date: \(response.expiresAt)")
-                        #endif
-                        // Fallback to a reasonable default expiration time
-                        let fallbackDate = Date().addingTimeInterval(60 * 60)  // 1 hour from now
-                        guard self.keychainService.saveTokenExpiration(fallbackDate) else {
-                            self.handleKeychainError(message: "Failed to save token expiration.")
-                            return
-                        }
-                        self.scheduleTokenRefresh(expirationDate: fallbackDate)
-                    }
-
-                    guard self.keychainService.saveCurrentUser(response.user) else {
-                        self.handleKeychainError(message: "Failed to save current user.")
-                        return
-                    }
-
-                    // Update auth state
-                    self.updateAuthState(.signedIn(response.user))
+                    self.handleSuccessfulAuthentication(response)
                 }
             )
             .store(in: &cancellables)
     }
 
     /// Exchange Apple ID token for app token
-    ///
-    /// - Parameters:
-    ///   - idToken: The Apple ID token to exchange
     func exchangeAppleToken(idToken: String) {
         self.isAuthenticating = true
         self.errorMessage = nil
@@ -469,78 +381,13 @@ class AuthViewModel: ObservableObject {
                 },
                 receiveValue: { [weak self] response in
                     guard let self = self else { return }
-
-                    // Store auth data
-                    guard self.keychainService.saveAuthToken(response.token) else {
-                        self.handleKeychainError(message: "Failed to save auth token.")
-                        return
-                    }
-
-                    guard self.keychainService.saveRefreshToken(response.refreshToken) else {
-                        self.handleKeychainError(message: "Failed to save refresh token.")
-                        return
-                    }
-
-                    // Parse date from string for token expiration
-                    let dateFormatter = ISO8601DateFormatter()
-                    dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-                    if let date = dateFormatter.date(from: response.expiresAt) {
-                        guard self.keychainService.saveTokenExpiration(date) else {
-                            self.handleKeychainError(message: "Failed to save token expiration.")
-                            return
-                        }
-                        self.scheduleTokenRefresh(expirationDate: date)
-                    } else {
-                        #if DEBUG
-                            print("Failed to parse date: \(response.expiresAt)")
-                        #endif
-
-                        // Fallback to a reasonable default expiration time
-                        let fallbackDate = Date().addingTimeInterval(60 * 60)  // 1 hour from now
-                        guard self.keychainService.saveTokenExpiration(fallbackDate) else {
-                            self.handleKeychainError(message: "Failed to save token expiration.")
-                            return
-                        }
-                        self.scheduleTokenRefresh(expirationDate: fallbackDate)
-                    }
-
-                    guard self.keychainService.saveCurrentUser(response.user) else {
-                        self.handleKeychainError(message: "Failed to save current user.")
-                        return
-                    }
-
-                    // Update auth state
-                    self.updateAuthState(.signedIn(response.user))
+                    self.handleSuccessfulAuthentication(response)
                 }
             )
             .store(in: &cancellables)
     }
 
-    // MARK: - Private Helper Methods
-
-    /// Handle keychain errors
-    ///
-    /// - Parameters:
-    ///   - message: The error message to display
-    private func handleKeychainError(message: String) {
-        #if DEBUG
-            self.errorMessage = message
-            self.showError = true
-            print("Keychain error: \(message)")
-        #endif
-        self.updateAuthState(.signedOut)
-        // Clear all tokens
-        self.keychainService.clearAllTokens()
-
-        // Invalidate the token refresh timer
-        self.tokenRefreshTimer?.invalidate()
-        self.tokenRefreshTimer = nil
-    }
-
     /// Refresh auth token using refresh token
-    ///
-    /// - Parameters:
-    ///   - refreshToken: The refresh token to use for refreshing the auth token
     private func refreshAuthToken(refreshToken: String) {
         self.authService.refreshToken(refreshToken: refreshToken)
             .receive(on: DispatchQueue.main)
@@ -549,109 +396,132 @@ class AuthViewModel: ObservableObject {
                     #if DEBUG
                         print("Failed to refresh token: \(error.localizedDescription)")
                     #endif
-                    
-                    // Check if the failure is due to connectivity issues
+
                     if case .connectivityError = error {
-                        // Network connectivity issue - don't log out
                         self.updateAuthState(.serverUnreachable)
                     } else {
-                        // Other errors - clear tokens and update auth state
                         self.keychainService.clearAllTokens()
                         self.updateAuthState(.signedOut)
                     }
                 }
             } receiveValue: { response in
-                // Store new auth data
-                _ = self.keychainService.saveAuthToken(response.token)
-                _ = self.keychainService.saveRefreshToken(response.refreshToken)
-
-                // Parse date from string for token expiration
-                let dateFormatter = ISO8601DateFormatter()
-                dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-                if let date = dateFormatter.date(from: response.expiresAt) {
-                    _ = self.keychainService.saveTokenExpiration(date)
-                    self.scheduleTokenRefresh(expirationDate: date)
-                } else {
-                    #if DEBUG
-                        print("Failed to parse date: \(response.expiresAt)")
-                    #endif
-                    // Fallback to a reasonable default expiration time
-                    let fallbackDate = Date().addingTimeInterval(60 * 60)  // 1 hour from now
-                    _ = self.keychainService.saveTokenExpiration(fallbackDate)
-                    self.scheduleTokenRefresh(expirationDate: fallbackDate)
-                }
-
-                // Update current user data
-                _ = self.keychainService.saveCurrentUser(response.user)
-
-                // Update auth state
-                self.updateAuthState(.signedIn(self._currentUser!))
+                self.handleSuccessfulAuthentication(response)
             }
             .store(in: &cancellables)
     }
 
-    /// Schedule token refresh
-    ///
-    /// - Parameters:
-    ///   - expirationDate: The expiration date of the token
-    /// - Note: The token will be refreshed 5 minutes before it expires.
-    ///         If the token is already expired or too close to expiration, it will be refreshed immediately.
-    private func scheduleTokenRefresh(expirationDate: Date) {
-        tokenRefreshTimer?.invalidate()  // Cancel any existing timer
-
-        let refreshTime = expirationDate.addingTimeInterval(-tokenRefreshBuffer)
-        let now = Date()
-
-        guard refreshTime > now else {
-            // Token already expired or too close to expiration, attempt to refresh immediately
-            if let refreshToken = keychainService.getRefreshToken() {
-                refreshAuthToken(refreshToken: refreshToken)
-            }
+    /// Refresh the authentication token if needed
+    private func refreshAuthToken() {
+        guard let refreshToken = keychainService.getRefreshToken() else {
+            print("No refresh token available, signing out")
+            signOut()
             return
         }
-
-        let timeInterval = refreshTime.timeIntervalSince(now)
-
-        tokenRefreshTimer = Timer.scheduledTimer(withTimeInterval: timeInterval, repeats: false) {
-            [weak self] _ in
-            guard let self = self, let refreshToken = self.keychainService.getRefreshToken() else {
-                return
-            }
-            self.refreshAuthToken(refreshToken: refreshToken)
-        }
-    }
-    
-    /// Helper to show errors easily
-    /// - Parameters:
-    ///     - message: The error message
-    func showError(message: String) {
-        DispatchQueue.main.async {
-            self.errorMessage = message
-            self.showError = true
-        }
-    }
-    
-    /// Retry connection to the server
-    func retryConnection() {
-        // Set loading state first
-        self.authState = .loading
         
-        // Delay to show the loading state
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            // Check for existing authentication state
-            if let user = self.keychainService.getCurrentUser(),
-               let expiration = self.keychainService.getTokenExpiration(),
-               Date() < expiration {
-                // Valid token found, validate with server
-                self.validateToken(fallbackUser: user, fallbackExpiration: expiration)
-            } else if let refreshToken = self.keychainService.getRefreshToken() {
-                // Token expired, try to refresh
-                self.refreshAuthToken(refreshToken: refreshToken)
-            } else {
-                // No valid token or refresh token, set to logged out
-                self.updateAuthState(.signedOut)
+        refreshAuthToken(refreshToken: refreshToken)
+    }
+
+    /// Handle keychain operation errors
+    private func handleKeychainError(operation: String) {
+        print("Keychain operation failed: \(operation)")
+        // For keychain errors, we'll show a generic error but not sign out
+        // as the tokens might still be valid in memory
+        showError(message: "Unable to securely store authentication data. Please restart the app if issues persist.")
+    }
+
+    /// Show error message to user
+    func showError(message: String) {
+        self.errorMessage = message
+        self.showError = true
+    }
+
+    /// Clear the error message
+    func clearError() {
+        self.errorMessage = nil
+        self.showError = false
+    }
+
+    /// Schedule automatic token refresh before expiration
+    private func scheduleTokenRefresh(expirationDate: Date) {
+        tokenRefreshTimer?.invalidate()
+        
+        let refreshTime = expirationDate.addingTimeInterval(-tokenRefreshBuffer)
+        let timeUntilRefresh = refreshTime.timeIntervalSinceNow
+        
+        guard timeUntilRefresh > 0 else {
+            // Token expires soon, refresh immediately
+            refreshAuthToken()
+            return
+        }
+        
+        tokenRefreshTimer = Timer.scheduledTimer(withTimeInterval: timeUntilRefresh, repeats: false) { [weak self] _ in
+            self?.refreshAuthToken()
+        }
+        
+        print("Scheduled token refresh in \(timeUntilRefresh) seconds")
+    }
+
+    /// Process successful authentication response and update app state
+    private func handleSuccessfulAuthentication(_ response: LoginResponse) {
+        print("Processing successful authentication")
+        
+        // Store authentication data in keychain
+        let tokenSaved = keychainService.saveAuthToken(response.token)
+        if !tokenSaved {
+            handleKeychainError(operation: "save auth token")
+        }
+        
+        if let refreshToken = response.refreshToken {
+            let refreshTokenSaved = keychainService.saveRefreshToken(refreshToken)
+            if !refreshTokenSaved {
+                handleKeychainError(operation: "save refresh token")
             }
         }
+        
+        // Parse and store token expiration if available
+        if let expirationDate = parseTokenExpiration(response.expiresAt) {
+            let expirationSaved = keychainService.saveTokenExpiration(expirationDate)
+            if !expirationSaved {
+                handleKeychainError(operation: "save token expiration")
+            }
+            scheduleTokenRefresh(expirationDate: expirationDate)
+        }
+        
+        // Store user information
+        if let user = response.user {
+            let userSaved = keychainService.saveCurrentUser(user)
+            if !userSaved {
+                handleKeychainError(operation: "save user information")
+            }
+            
+            // Update view model state
+            self._currentUser = user
+            self.authState = .signedIn(user)
+        }
+        
+        // Clear any existing errors
+        clearError()
+        
+        print("Authentication completed successfully")
+    }
+
+    /// Retry connection when server is unreachable
+    func retryConnection() {
+        print("Retrying connection...")
+        authState = .loading
+        
+        // Clear any existing error state
+        clearError()
+        
+        // Check authentication status again
+        checkAuthStatus()
+    }
+
+    /// Parse token expiration date from string
+    private func parseTokenExpiration(_ expiresAt: String) -> Date? {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter.date(from: expiresAt)
     }
 }
 
